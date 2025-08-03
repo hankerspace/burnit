@@ -134,7 +134,7 @@ function LayerItem({
       case 'gif':
         return (
           <div className="layer-thumbnail gif-thumbnail">
-            <img src={asset.src} alt={asset.name} loading="lazy" />
+            <img src={asset.src} alt={asset.name} className="layer-thumbnail" loading="lazy" />
             <div className="layer-badge">GIF</div>
           </div>
         );

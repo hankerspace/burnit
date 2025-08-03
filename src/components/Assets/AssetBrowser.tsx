@@ -10,8 +10,10 @@ export function AssetBrowser() {
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const assets = useAppStore((state) => state.currentProject?.assets || {});
+  const library = useAppStore((state) => state.library);
   const addAsset = useAppStore((state) => state.addAsset);
   const addLayer = useAppStore((state) => state.addLayer);
+  const addLibraryAssetToProject = useAppStore((state) => state.addLibraryAssetToProject);
 
   const handleFileUpload = useCallback(async (files: FileList) => {
     setIsUploading(true);
@@ -71,14 +73,26 @@ export function AssetBrowser() {
     }
   }, [handleFileUpload]);
 
-  const handleAddToCanvas = useCallback((asset: Asset) => {
-    const layerId = addLayer(asset.id);
-    if (layerId) {
-      console.log(`Added layer ${layerId} for asset ${asset.name}`);
+  const handleAddToCanvas = useCallback((asset: Asset, isLibraryAsset = false) => {
+    if (isLibraryAsset) {
+      // For library assets, add them to the project first
+      const layerId = addLibraryAssetToProject(asset.id, asset.name);
+      if (layerId) {
+        console.log(`Added library asset ${asset.name} to project with layer ${layerId}`);
+      }
+    } else {
+      // For project assets, add layer directly
+      const layerId = addLayer(asset.id);
+      if (layerId) {
+        console.log(`Added layer ${layerId} for asset ${asset.name}`);
+      }
     }
-  }, [addLayer]);
+  }, [addLayer, addLibraryAssetToProject]);
 
-  const assetList = Object.values(assets);
+  // Combine project assets with library assets
+  const projectAssets = Object.values(assets);
+  const libraryAssets = library?.categories?.flatMap(category => category.assets) || [];
+  const assetList = [...projectAssets, ...libraryAssets];
 
   return (
     <div className="asset-browser panel">
@@ -179,6 +193,7 @@ function AssetItem({ asset, onAddToCanvas }: AssetItemProps) {
             <img
               src={asset.src}
               alt={asset.name}
+              className="asset-thumbnail"
               loading="lazy"
             />
             <div className="asset-badge">GIF</div>
