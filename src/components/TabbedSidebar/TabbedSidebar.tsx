@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { AssetBrowser } from '../Assets/AssetBrowser';
 import { LayerList } from '../LayerList/LayerList';
 import './TabbedSidebar.css';
 
-type TabType = 'assets' | 'layers';
+type TabType = 'assets' | 'layers' | 'settings';
 
 export function TabbedSidebar() {
   const [activeTab, setActiveTab] = useState<TabType>('assets');
@@ -29,6 +29,13 @@ export function TabbedSidebar() {
           <span className="tab-icon">📋</span>
           <span className="tab-label">Layers</span>
         </button>
+        <button
+          className={`sidebar-tab ${activeTab === 'settings' ? 'active' : ''}`}
+          onClick={() => handleTabClick('settings')}
+        >
+          <span className="tab-icon">⚙️</span>
+          <span className="tab-label">Settings</span>
+        </button>
       </div>
       
       <div className="sidebar-content">
@@ -40,6 +47,11 @@ export function TabbedSidebar() {
         {activeTab === 'layers' && (
           <div className="tab-panel">
             <LayerList />
+          </div>
+        )}
+        {activeTab === 'settings' && (
+          <div className="tab-panel">
+            <ProjectSettings />
           </div>
         )}
       </div>

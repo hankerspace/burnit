@@ -11,6 +11,8 @@ export function LayerList() {
   const updateLayer = useAppStore((state) => state.updateLayer);
   const removeLayer = useAppStore((state) => state.removeLayer);
   const duplicateLayer = useAppStore((state) => state.duplicateLayer);
+  const moveLayerUp = useAppStore((state) => state.moveLayerUp);
+  const moveLayerDown = useAppStore((state) => state.moveLayerDown);
 
   if (!currentProject) {
     return (
@@ -55,6 +57,8 @@ export function LayerList() {
                   onUpdate={updateLayer}
                   onRemove={removeLayer}
                   onDuplicate={duplicateLayer}
+                  onMoveUp={moveLayerUp}
+                  onMoveDown={moveLayerDown}
                 />
               );
             })}
@@ -74,6 +78,8 @@ interface LayerItemProps {
   onUpdate: (layerId: string, updates: Partial<Layer>) => void;
   onRemove: (layerId: string) => void;
   onDuplicate: (layerId: string) => void;
+  onMoveUp: (layerId: string) => void;
+  onMoveDown: (layerId: string) => void;
 }
 
 function LayerItem({
@@ -84,7 +90,9 @@ function LayerItem({
   onToggleSelect,
   onUpdate,
   onRemove,
-  onDuplicate
+  onDuplicate,
+  onMoveUp,
+  onMoveDown
 }: LayerItemProps) {
   const handleClick = useCallback((e: React.MouseEvent) => {
     if (e.metaKey || e.ctrlKey) {
@@ -115,6 +123,16 @@ function LayerItem({
     e.stopPropagation();
     onDuplicate(layer.id);
   }, [layer.id, onDuplicate]);
+
+  const handleMoveUp = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onMoveUp(layer.id);
+  }, [layer.id, onMoveUp]);
+
+  const handleMoveDown = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation();
+    onMoveDown(layer.id);
+  }, [layer.id, onMoveDown]);
 
   const renderThumbnail = () => {
     if (!asset) {
@@ -190,6 +208,22 @@ function LayerItem({
       </div>
       
       <div className="layer-actions">
+        <button
+          className="layer-action btn btn-small btn-icon"
+          onClick={handleMoveUp}
+          title="Move layer up (forward)"
+        >
+          ⬆️
+        </button>
+        
+        <button
+          className="layer-action btn btn-small btn-icon"
+          onClick={handleMoveDown}
+          title="Move layer down (backward)"
+        >
+          ⬇️
+        </button>
+        
         <button
           className="layer-action btn btn-small btn-icon"
           onClick={handleDuplicate}
