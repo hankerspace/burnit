@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { AssetBrowser } from '../Assets/AssetBrowser';
 import { LayerList } from '../LayerList/LayerList';
+import { ProjectSettings } from '../ProjectSettings/ProjectSettings';
 import './TabbedSidebar.css';
 
 type TabType = 'assets' | 'layers' | 'settings';
