@@ -174,6 +174,31 @@
   cursor: progress;
 }
 
+/* Drag & Drop states */
+.canvas.drag-over {
+  border: 2px dashed var(--color-fire-primary);
+  background: rgba(255, 149, 0, 0.05);
+  box-shadow: 0 0 20px rgba(255, 149, 0, 0.3);
+}
+
+.canvas-container.drag-over::after {
+  content: "Drop images or GIFs here";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: var(--color-fire-primary);
+  padding: var(--spacing-md) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 1.1em;
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--color-fire-primary);
+  z-index: 10;
+  pointer-events: none;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .canvas-stage {

@@ -53,6 +53,8 @@ interface AppState {
   updateLayer: (layerId: UUID, updates: Partial<Layer>) => void;
   updateLayerTransform: (layerId: UUID, transform: Partial<LayerTransform>) => void;
   reorderLayers: (layerIds: UUID[]) => void;
+  moveLayerUp: (layerId: UUID) => void;
+  moveLayerDown: (layerId: UUID) => void;
   duplicateLayer: (layerId: UUID) => UUID;
   
   // Selection actions
@@ -324,6 +326,50 @@ export const useAppStore = create<AppState>()(
         currentProject: {
           ...currentProject,
           layers: reorderedLayers,
+          updatedAt: new Date().toISOString()
+        }
+      });
+    },
+
+    moveLayerUp: (layerId: UUID) => {
+      const { currentProject } = get();
+      if (!currentProject) return;
+
+      const layers = [...currentProject.layers];
+      const currentIndex = layers.findIndex(layer => layer.id === layerId);
+      
+      // Can't move up if already at the end (front-most layer)
+      if (currentIndex === -1 || currentIndex === layers.length - 1) return;
+
+      // Swap with the next layer (move towards front)
+      [layers[currentIndex], layers[currentIndex + 1]] = [layers[currentIndex + 1], layers[currentIndex]];
+
+      set({
+        currentProject: {
+          ...currentProject,
+          layers,
+          updatedAt: new Date().toISOString()
+        }
+      });
+    },
+
+    moveLayerDown: (layerId: UUID) => {
+      const { currentProject } = get();
+      if (!currentProject) return;
+
+      const layers = [...currentProject.layers];
+      const currentIndex = layers.findIndex(layer => layer.id === layerId);
+      
+      // Can't move down if already at the beginning (back-most layer)
+      if (currentIndex === -1 || currentIndex === 0) return;
+
+      // Swap with the previous layer (move towards back)
+      [layers[currentIndex], layers[currentIndex - 1]] = [layers[currentIndex - 1], layers[currentIndex]];
+
+      set({
+        currentProject: {
+          ...currentProject,
+          layers,
           updatedAt: new Date().toISOString()
         }
       });

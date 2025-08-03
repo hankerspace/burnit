@@ -1,7 +1,10 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { useAppStore } from '../../state';
 import { clearCanvas, drawLayer, drawGrid, drawSelectionHandles } from '../../lib/canvas/draw';
-import type { Layer, Asset } from '../../types';
+import type { Layer, Asset, ImageAsset, GifAsset } from '../../types';
+import { decodeGif } from '../../lib/gif/decode';
+import { isImageFile, isGifFile, createBlobUrl, createImageFromFile } from '../../utils/file';
+import { generateId } from '../../utils/id';
 import './CanvasStage.css';
 
 export function CanvasStage() {
@@ -36,6 +39,7 @@ export function CanvasStage() {
   const gridSize = useAppStore((state) => state.gridSize);
   
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
+  const [isDragOver, setIsDragOver] = useState(false);
 
   // Calculate canvas dimensions based on project settings and zoom
   const updateCanvasSize = useCallback(() => {
@@ -121,7 +125,7 @@ export function CanvasStage() {
     }
   }, [currentProject, showGrid, gridSize, canvasState.selectedLayerIds]);
 
-  // Animation loop
+  // Animation loop with FPS control
   const animate = useCallback((timestamp: number) => {
     if (!timeline.isPlaying) {
       render(timeline.currentTime);
@@ -129,35 +133,43 @@ export function CanvasStage() {
     }
     
     const deltaTime = timestamp - lastTimeRef.current;
-    lastTimeRef.current = timestamp;
     
-    // Update timeline
-    const newTime = timeline.currentTime + (deltaTime * timeline.speed);
+    // Calculate target frame interval based on project FPS
+    const targetFPS = currentProject?.settings.fps || 30;
+    const targetFrameInterval = 1000 / targetFPS; // milliseconds per frame
     
-    // Handle looping
-    let maxDuration = 5000; // Default 5 seconds
-    if (currentProject) {
-      const animatedAssets = Object.values(currentProject.assets).filter(
-        asset => asset.kind === 'gif' || asset.kind === 'video'
-      );
+    // Only update if enough time has passed for the target FPS
+    if (deltaTime >= targetFrameInterval) {
+      lastTimeRef.current = timestamp;
       
-      if (animatedAssets.length > 0) {
-        maxDuration = Math.max(
-          ...animatedAssets.map(asset => 
-            asset.kind === 'gif' ? asset.totalDurationMs : asset.durationMs
-          )
+      // Update timeline
+      const newTime = timeline.currentTime + (deltaTime * timeline.speed);
+      
+      // Handle looping
+      let maxDuration = 5000; // Default 5 seconds
+      if (currentProject) {
+        const animatedAssets = Object.values(currentProject.assets).filter(
+          asset => asset.kind === 'gif' || asset.kind === 'video'
         );
+        
+        if (animatedAssets.length > 0) {
+          maxDuration = Math.max(
+            ...animatedAssets.map(asset => 
+              asset.kind === 'gif' ? asset.totalDurationMs : asset.durationMs
+            )
+          );
+        }
+        
+        if (currentProject.settings.loopDurationMs !== 'auto') {
+          maxDuration = currentProject.settings.loopDurationMs;
+        }
       }
       
-      if (currentProject.settings.loopDurationMs !== 'auto') {
-        maxDuration = currentProject.settings.loopDurationMs;
-      }
+      const loopedTime = newTime % maxDuration;
+      useAppStore.getState().setCurrentTime(loopedTime);
+      
+      render(loopedTime);
     }
-    
-    const loopedTime = newTime % maxDuration;
-    useAppStore.getState().setCurrentTime(loopedTime);
-    
-    render(loopedTime);
     
     animationFrameRef.current = requestAnimationFrame(animate);
   }, [timeline, currentProject, render]);
@@ -265,6 +277,61 @@ export function CanvasStage() {
       y: (clientY - rect.top) * scaleY
     };
   }, [currentProject]);
+
+  // Helper function to create ImageAsset from File
+  const createImageAsset = useCallback(async (file: File): Promise<ImageAsset> => {
+    const img = await createImageFromFile(file);
+    const bitmap = await createImageBitmap(img);
+    
+    return {
+      id: generateId(),
+      name: file.name,
+      kind: 'image',
+      width: bitmap.width,
+      height: bitmap.height,
+      src: createBlobUrl(file),
+      bitmap
+    };
+  }, []);
+
+  // Helper function to process dropped files
+  const processDroppedFiles = useCallback(async (files: FileList, dropX: number, dropY: number) => {
+    const store = useAppStore.getState();
+    
+    for (const file of Array.from(files)) {
+      if (!isImageFile(file) && !isGifFile(file)) {
+        continue; // Skip unsupported files
+      }
+
+      try {
+        let asset: ImageAsset | GifAsset;
+        
+        if (isGifFile(file)) {
+          asset = await decodeGif(file);
+        } else {
+          asset = await createImageAsset(file);
+        }
+
+        // Add asset to project
+        store.addAsset(asset);
+        
+        // Create layer and position it at drop location
+        const layerId = store.addLayer(asset.id, asset.name);
+        if (layerId) {
+          // Update layer position to drop location
+          store.updateLayerTransform(layerId, {
+            x: dropX,
+            y: dropY
+          });
+          
+          // Select the newly created layer
+          store.selectLayer(layerId);
+        }
+      } catch (error) {
+        console.error('Failed to process dropped file:', file.name, error);
+      }
+    }
+  }, [createImageAsset]);
 
   // Handle mouse down - start drag or select
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -459,6 +526,50 @@ export function CanvasStage() {
     // Click is handled by mouseDown, but we keep this for any future click-specific logic
   }, []);
 
+  // Drag & Drop event handlers
+  const handleDragEnter = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Check if dragged items contain files
+    if (e.dataTransfer.types.includes('Files')) {
+      setIsDragOver(true);
+    }
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Set the drop effect to copy
+    e.dataTransfer.dropEffect = 'copy';
+  }, []);
+
+  const handleDragLeave = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Only hide drag over state if leaving the canvas container
+    if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+      setIsDragOver(false);
+    }
+  }, []);
+
+  const handleDrop = useCallback(async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+    
+    const files = e.dataTransfer.files;
+    if (files.length === 0) return;
+    
+    // Get drop position in canvas coordinates
+    const { x, y } = screenToCanvas(e.clientX, e.clientY);
+    
+    // Process the dropped files
+    await processDroppedFiles(files, x, y);
+  }, [screenToCanvas, processDroppedFiles]);
+
   if (!currentProject) {
     return (
       <div className="canvas-stage">
@@ -471,10 +582,10 @@ export function CanvasStage() {
 
   return (
     <div className="canvas-stage" ref={containerRef}>
-      <div className="canvas-container">
+      <div className={`canvas-container ${isDragOver ? 'drag-over' : ''}`}>
         <canvas
           ref={canvasRef}
-          className="canvas"
+          className={`canvas ${isDragOver ? 'drag-over' : ''}`}
           style={{
             width: canvasSize.width,
             height: canvasSize.height,
@@ -489,6 +600,10 @@ export function CanvasStage() {
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
           onMouseLeave={handleMouseUp}
+          onDragEnter={handleDragEnter}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
         />
         
         <div className="canvas-overlay">
