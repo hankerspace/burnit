@@ -316,7 +316,8 @@ export function applyRotationTransform(
 export function findLayerAtPoint(
   point: CanvasPoint,
   layers: Layer[],
-  assets: Record<string, Asset>
+  assets: Record<string, Asset>,
+  includeLockedLayers: boolean = false
 ): Layer | null {
   // Check layers in reverse order (topmost first)
   for (let i = layers.length - 1; i >= 0; i--) {
@@ -324,6 +325,9 @@ export function findLayerAtPoint(
     const asset = assets[layer.assetId];
     
     if (!layer.visible || !asset) continue;
+    
+    // Skip locked layers unless explicitly requested
+    if (layer.locked && !includeLockedLayers) continue;
     
     if (isPointInLayer(point, layer, asset)) {
       return layer;

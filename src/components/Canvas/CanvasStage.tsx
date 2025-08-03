@@ -201,15 +201,16 @@ export function CanvasStage() {
     
     console.log('Canvas clicked at:', canvasPoint);
     
-    // Find layer at click point
+    // Find layer at click point (include locked layers for selection, but not interaction)
     const clickedLayer = findLayerAtPoint(
       canvasPoint,
       currentProject.layers,
-      currentProject.assets
+      currentProject.assets,
+      true // Include locked layers for selection
     );
     
     if (clickedLayer) {
-      // Select the clicked layer
+      // Select the clicked layer (even if locked)
       if (e.ctrlKey || e.metaKey) {
         // Multi-select
         const isSelected = canvasState.selectedLayerIds.includes(clickedLayer.id);
@@ -247,7 +248,7 @@ export function CanvasStage() {
     
     // Check if we're clicking on a selected layer's resize handle
     const selectedLayers = currentProject.layers.filter(layer =>
-      canvasState.selectedLayerIds.includes(layer.id)
+      canvasState.selectedLayerIds.includes(layer.id) && !layer.locked
     );
     
     let resizeHandle: ResizeHandle | null = null;
@@ -265,7 +266,7 @@ export function CanvasStage() {
       }
     }
     
-    if (resizeHandle && targetLayer) {
+    if (resizeHandle && targetLayer && !targetLayer.locked) {
       // Start resize interaction
       setCurrentInteraction({
         type: 'resize',
@@ -276,14 +277,15 @@ export function CanvasStage() {
         handle: resizeHandle
       });
     } else {
-      // Check if clicking on a layer
+      // Check if clicking on a layer (exclude locked layers for interaction)
       const clickedLayer = findLayerAtPoint(
         canvasPoint,
         currentProject.layers,
-        currentProject.assets
+        currentProject.assets,
+        false // Don't include locked layers for interaction
       );
       
-      if (clickedLayer && canvasState.selectedLayerIds.includes(clickedLayer.id)) {
+      if (clickedLayer && canvasState.selectedLayerIds.includes(clickedLayer.id) && !clickedLayer.locked) {
         // Start move interaction on selected layer
         setCurrentInteraction({
           type: 'move',
@@ -292,7 +294,7 @@ export function CanvasStage() {
           currentPoint: canvasPoint,
           startTransform: { ...clickedLayer.transform }
         });
-      } else if (clickedLayer) {
+      } else if (clickedLayer && !clickedLayer.locked) {
         // Select and start moving
         selectLayer(clickedLayer.id);
         setCurrentInteraction({
@@ -404,11 +406,12 @@ export function CanvasStage() {
         const hoveredLayer = findLayerAtPoint(
           canvasPoint,
           currentProject.layers,
-          currentProject.assets
+          currentProject.assets,
+          true // Include locked layers for cursor feedback
         );
         
         if (hoveredLayer) {
-          newCursor = 'move';
+          newCursor = hoveredLayer.locked ? 'not-allowed' : 'move';
         }
       }
       
