@@ -92,7 +92,19 @@ export function AssetBrowser() {
   // Combine project assets with library assets
   const projectAssets = Object.values(assets);
   const libraryAssets = library?.categories?.flatMap(category => category.assets) || [];
-  const assetList = [...projectAssets, ...libraryAssets];
+  
+  // Filter out library assets that have already been added to the project
+  // to prevent duplication in the UI
+  const filteredLibraryAssets = libraryAssets.filter(libraryAsset => {
+    // Check if this library asset has been added to the project
+    // by looking for any project asset that has the same name and kind
+    return !projectAssets.some(projectAsset => 
+      projectAsset.name === libraryAsset.name && 
+      projectAsset.kind === libraryAsset.kind
+    );
+  });
+  
+  const assetList = [...projectAssets, ...filteredLibraryAssets];
 
   return (
     <div className="asset-browser panel">
