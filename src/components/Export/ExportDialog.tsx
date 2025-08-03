@@ -1,15 +1,39 @@
 import { useState, useCallback } from 'react';
 import { useAppStore } from '../../state';
-import { exportProjectAsPNG, exportProjectAsJPEG, downloadBlob, generateExportFilename } from '../../lib/export';
+import { exportProjectAsPNG, exportProjectAsJPEG, exportProjectAsGIF, exportProjectAsWebM, downloadBlob, generateExportFilename } from '../../lib/export';
 import './ExportDialog.css';
 
 export function ExportDialog() {
   const [isOpen, setIsOpen] = useState(false);
-  const [exportFormat, setExportFormat] = useState<'png' | 'jpeg' | 'gif' | 'webm'>('png');
+  const [exportFormat, setExportFormat] = useState<'png' | 'jpeg' | 'gif' | 'webm'>('gif');
   const [isExporting, setIsExporting] = useState(false);
   
   const currentProject = useAppStore((state) => state.currentProject);
   const timeline = useAppStore((state) => state.timeline);
+
+  // Helper function to resolve actual duration from project settings
+  const getActualDuration = useCallback((project: typeof currentProject) => {
+    if (!project) return 3000; // fallback
+    
+    if (project.settings.loopDurationMs !== 'auto') {
+      return project.settings.loopDurationMs;
+    }
+    
+    // Calculate max duration from animated assets (same logic as CanvasStage)
+    const animatedAssets = Object.values(project.assets).filter(
+      asset => asset.kind === 'gif' || asset.kind === 'video'
+    );
+    
+    if (animatedAssets.length > 0) {
+      return Math.max(
+        ...animatedAssets.map(asset => 
+          asset.kind === 'gif' ? asset.totalDurationMs : asset.durationMs
+        )
+      );
+    }
+    
+    return 3000; // fallback if no animated assets
+  }, []);
 
   const handleExport = useCallback(async () => {
     if (!currentProject) return;
@@ -19,6 +43,7 @@ export function ExportDialog() {
     try {
       const currentTime = timeline.currentTime;
       const filename = generateExportFilename(currentProject.name, exportFormat);
+      const actualDuration = getActualDuration(currentProject);
       
       if (exportFormat === 'png') {
         const blob = await exportProjectAsPNG(currentProject, currentTime);
@@ -26,9 +51,12 @@ export function ExportDialog() {
       } else if (exportFormat === 'jpeg') {
         const blob = await exportProjectAsJPEG(currentProject, currentTime, 0.9);
         downloadBlob(blob, filename);
-      } else {
-        // For GIF and WebM, show not implemented message for now
-        alert(`Export as ${exportFormat.toUpperCase()} - Not implemented yet`);
+      } else if (exportFormat === 'gif') {
+        const blob = await exportProjectAsGIF(currentProject, 80, actualDuration);
+        downloadBlob(blob, filename);
+      } else if (exportFormat === 'webm') {
+        const blob = await exportProjectAsWebM(currentProject, 2500000, actualDuration);
+        downloadBlob(blob, filename);
       }
     } catch (error) {
       console.error('Export error:', error);
