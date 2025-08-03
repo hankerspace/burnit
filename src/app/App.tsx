@@ -1,7 +1,6 @@
 import React from 'react';
-import { AssetBrowser } from '../components/Assets/AssetBrowser';
+import { TabbedSidebar } from '../components/TabbedSidebar/TabbedSidebar';
 import { CanvasStage } from '../components/Canvas/CanvasStage';
-import { LayerList } from '../components/LayerList/LayerList';
 import { Timeline } from '../components/Timeline/Timeline';
 import { Inspector } from '../components/Inspector/Inspector';
 import { ExportDialog } from '../components/Export/ExportDialog';
@@ -47,8 +46,7 @@ function App() {
 
       <div className="app-content">
         <aside className="app-sidebar-left">
-          <AssetBrowser />
-          <LayerList />
+          <TabbedSidebar />
         </aside>
 
         <main className="app-main">
