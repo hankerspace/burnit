@@ -3,6 +3,7 @@ import { useAppStore } from '../../state';
 import { decodeGif } from '../../lib/gif/decode';
 import { createImageAsset, createVideoAsset, supportsWebMVideo } from '../../lib/video/utils';
 import { isImageFile, isGifFile, isVideoFile, isWebPFile, supportsWebP } from '../../utils/file';
+import { GifThumbnail } from '../GifThumbnail';
 import type { Asset } from '../../types';
 import './AssetBrowser.css';
 
@@ -196,18 +197,13 @@ function AssetItem({ asset, onAddToCanvas }: AssetItemProps) {
       case 'gif':
         return (
           <div className="asset-thumbnail gif-thumbnail">
-            <img
-              src={asset.src}
-              alt={asset.name}
-              loading="lazy"
+            <GifThumbnail 
+              asset={asset}
+              size={64}
+              showControls={false}
+              autoPlay={true}
+              className="asset-gif-preview"
             />
-            <div className="asset-badge gif-badge">
-              <span>GIF</span>
-              <span className="frame-count">{asset.frames.length}f</span>
-            </div>
-            <div className="asset-duration">
-              {(asset.totalDurationMs / 1000).toFixed(1)}s
-            </div>
           </div>
         );
       case 'video':

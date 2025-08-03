@@ -61,6 +61,15 @@
   background: var(--color-bg-elevated);
 }
 
+.layer-gif-preview {
+  width: 40px;
+  height: 40px;
+}
+
+.layer-gif-preview .gif-canvas {
+  border-radius: var(--radius-sm);
+}
+
 .layer-thumbnail.missing {
   display: flex;
   align-items: center;

@@ -112,6 +112,15 @@
   background: var(--color-bg-elevated);
 }
 
+.asset-gif-preview {
+  width: 48px;
+  height: 48px;
+}
+
+.asset-gif-preview .gif-canvas {
+  border-radius: var(--radius-sm);
+}
+
 .gif-thumbnail,
 .video-thumbnail {
   position: relative;

@@ -71,13 +71,16 @@ export async function decodeGif(file: File): Promise<GifAsset> {
     // Create ImageBitmap from current canvas state
     const bitmap = await createImageBitmap(canvas);
     
-    // Convert delay from centiseconds to milliseconds (minimum 10ms, maximum 2000ms for safety)
+    // Convert delay from centiseconds to milliseconds
     // Some GIFs have 0 delay which means "use default", typically 100ms
+    // Browsers typically enforce a minimum of 20ms for performance
     let durationMs = frame.delay * 10;
     if (durationMs === 0) {
-      durationMs = 100; // Default frame duration
-    } else {
-      durationMs = Math.max(Math.min(durationMs, 2000), 10); // Clamp between 10ms and 2s
+      durationMs = 100; // Default frame duration (100ms = 10 fps)
+    } else if (durationMs < 20) {
+      durationMs = 20; // Minimum browser frame duration
+    } else if (durationMs > 5000) {
+      durationMs = 5000; // Maximum reasonable frame duration (5 seconds)
     }
     
     gifFrames.push({
@@ -88,7 +91,7 @@ export async function decodeGif(file: File): Promise<GifAsset> {
     totalDurationMs += durationMs;
   }
 
-  return {
+  const gifAsset: GifAsset = {
     id: generateId(),
     name: file.name,
     kind: 'gif',
@@ -99,6 +102,17 @@ export async function decodeGif(file: File): Promise<GifAsset> {
     totalDurationMs,
     loopCount: (gif as any).gce?.loopCount || 'infinite'
   };
+
+  // Debug logging for GIF duration
+  console.log(`GIF decoded: ${file.name}`, {
+    frames: gifFrames.length,
+    totalDuration: totalDurationMs,
+    avgFrameDuration: totalDurationMs / gifFrames.length,
+    loopCount: gifAsset.loopCount,
+    dimensions: `${width}x${height}`
+  });
+
+  return gifAsset;
 }
 
 export function getFrameAtTime(gifAsset: GifAsset, timeMs: number): GifFrame {

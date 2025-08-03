@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { useAppStore } from '../../state';
+import { GifThumbnail } from '../GifThumbnail';
 import type { Layer, Asset } from '../../types';
 import './LayerList.css';
 
@@ -220,14 +221,13 @@ function LayerItem({
       case 'gif':
         return (
           <div className="layer-thumbnail gif-thumbnail">
-            <img src={asset.src} alt={asset.name} loading="lazy" />
-            <div className="layer-badge gif-badge">
-              <span>GIF</span>
-              <span className="frame-count">{asset.frames.length}f</span>
-            </div>
-            <div className="layer-duration">
-              {(asset.totalDurationMs / 1000).toFixed(1)}s
-            </div>
+            <GifThumbnail 
+              asset={asset}
+              size={40}
+              showControls={false}
+              autoPlay={true}
+              className="layer-gif-preview"
+            />
           </div>
         );
       case 'video':
