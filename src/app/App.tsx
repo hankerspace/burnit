@@ -5,10 +5,15 @@ import { Timeline } from '../components/Timeline/Timeline';
 import { Inspector } from '../components/Inspector/Inspector';
 import { ExportDialog } from '../components/Export/ExportDialog';
 import { useAppStore } from '../state';
+import type { Layer } from '../types';
 import './App.css';
 
 function App() {
   const currentProject = useAppStore((state) => state.currentProject);
+  const selectedLayerIds = useAppStore((state) => state.canvas.selectedLayerIds);
+  
+  // State for copied layers
+  const [copiedLayers, setCopiedLayers] = React.useState<Layer[]>([]);
 
   React.useEffect(() => {
     // Create a default project if none exists
@@ -19,6 +24,82 @@ function App() {
     // Load the asset library
     useAppStore.getState().loadAssetLibrary();
   }, [currentProject]);
+
+  // Keyboard shortcuts handler
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle shortcuts when not typing in an input field
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      const store = useAppStore.getState();
+      
+      // Ctrl+C - Copy selected layers
+      if (e.ctrlKey && e.key === 'c' && selectedLayerIds.length > 0 && currentProject) {
+        e.preventDefault();
+        const layersToCopy = currentProject.layers.filter(layer => 
+          selectedLayerIds.includes(layer.id)
+        );
+        setCopiedLayers(layersToCopy);
+      }
+      
+      // Ctrl+V - Paste copied layers
+      else if (e.ctrlKey && e.key === 'v' && copiedLayers.length > 0 && currentProject) {
+        e.preventDefault();
+        // Save state before adding new layers
+        store.saveStateForUndo();
+        const newLayerIds: string[] = [];
+        
+        copiedLayers.forEach(copiedLayer => {
+          // Check if the asset still exists in the current project
+          const asset = currentProject.assets[copiedLayer.assetId];
+          if (asset) {
+            // Create a new layer with the same asset but new ID and offset position
+            const newLayerId = store.addLayer(copiedLayer.assetId, `${copiedLayer.name} Copy`);
+            if (newLayerId) {
+              newLayerIds.push(newLayerId);
+              // Apply the copied layer's properties with slight offset
+              store.updateLayer(newLayerId, {
+                visible: copiedLayer.visible,
+                locked: copiedLayer.locked,
+                blendMode: copiedLayer.blendMode
+              });
+              store.updateLayerTransform(newLayerId, {
+                ...copiedLayer.transform,
+                x: copiedLayer.transform.x + 20,
+                y: copiedLayer.transform.y + 20
+              });
+            }
+          }
+        });
+        
+        // Select the newly pasted layers
+        if (newLayerIds.length > 0) {
+          store.selectLayers(newLayerIds);
+        }
+      }
+      
+      // Delete - Remove selected layers
+      else if (e.key === 'Delete' && selectedLayerIds.length > 0) {
+        e.preventDefault();
+        // Save state before destructive operation
+        store.saveStateForUndo();
+        selectedLayerIds.forEach(layerId => {
+          store.removeLayer(layerId);
+        });
+      }
+      
+      // Ctrl+Z - Undo
+      else if (e.ctrlKey && e.key === 'z') {
+        e.preventDefault();
+        store.undo();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [selectedLayerIds, copiedLayers, currentProject]);
 
   if (!currentProject) {
     return (

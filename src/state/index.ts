@@ -27,6 +27,9 @@ interface AppState {
   // Library state
   library: AssetLibrary;
   
+  // Undo state
+  undoStack: Project[];
+  
   // UI state
   selectedTool: 'select' | 'move' | 'rotate' | 'scale';
   showGrid: boolean;
@@ -79,6 +82,10 @@ interface AppState {
   // Library actions
   loadAssetLibrary: () => Promise<void>;
   addLibraryAssetToProject: (assetId: UUID, name?: string) => UUID | null;
+  
+  // Undo actions
+  undo: () => void;
+  saveStateForUndo: () => void;
 }
 
 const DEFAULT_COMPOSITION_SETTINGS: CompositionSettings = {
@@ -119,6 +126,7 @@ export const useAppStore = create<AppState>()(
     timeline: DEFAULT_TIMELINE_STATE,
     canvas: DEFAULT_CANVAS_STATE,
     library: { categories: [], isLoaded: false, isLoading: false },
+    undoStack: [],
     selectedTool: 'select',
     showGrid: false,
     snapToGrid: false,
@@ -508,6 +516,44 @@ export const useAppStore = create<AppState>()(
       const layerId = get().addLayer(projectAsset.id, projectAsset.name);
       
       return layerId;
+    },
+
+    // Undo actions
+    saveStateForUndo: () => {
+      const { currentProject, undoStack } = get();
+      if (!currentProject) return;
+
+      // Create a deep copy of the current project state
+      const projectCopy: Project = {
+        ...currentProject,
+        assets: { ...currentProject.assets },
+        layers: currentProject.layers.map(layer => ({
+          ...layer,
+          transform: { ...layer.transform }
+        })),
+        settings: { ...currentProject.settings }
+      };
+
+      // Add to undo stack (limit to 20 states)
+      const newUndoStack = [...undoStack, projectCopy].slice(-20);
+      
+      set({ undoStack: newUndoStack });
+    },
+
+    undo: () => {
+      const { undoStack } = get();
+      if (undoStack.length === 0) return;
+
+      // Get the last saved state
+      const previousState = undoStack[undoStack.length - 1];
+      const newUndoStack = undoStack.slice(0, -1);
+
+      // Restore the previous state
+      set({
+        currentProject: previousState,
+        undoStack: newUndoStack,
+        canvas: { ...get().canvas, selectedLayerIds: [] } // Clear selection after undo
+      });
     }
   }))
 );
