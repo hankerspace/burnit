@@ -11,6 +11,8 @@ import type {
   UUID
 } from '../types';
 import { generateId } from '../utils/id';
+import type { AssetLibrary } from '../lib/library';
+import { libraryManager, loadLibrary } from '../lib/library';
 
 interface AppState {
   // Project state
@@ -214,13 +216,24 @@ export const useAppStore = create<AppState>()(
 
       const asset = currentProject.assets[assetId];
       const layerId = generateId();
+      
+      // Calculate centered position based on composition settings and asset dimensions
+      const canvasWidth = currentProject.settings.width;
+      const canvasHeight = currentProject.settings.height;
+      const centeredX = (canvasWidth - asset.width) / 2;
+      const centeredY = (canvasHeight - asset.height) / 2;
+      
       const layer: Layer = {
         id: layerId,
         assetId,
         name: name || asset.name,
         visible: true,
         locked: false,
-        transform: { ...DEFAULT_LAYER_TRANSFORM },
+        transform: { 
+          ...DEFAULT_LAYER_TRANSFORM,
+          x: centeredX,
+          y: centeredY
+        },
         blendMode: 'normal'
       };
 
