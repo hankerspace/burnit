@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useCallback, useState } from 'react';
 import { useAppStore } from '../../state';
 import { clearCanvas, drawLayer, drawGrid, drawSelectionHandles } from '../../lib/canvas/draw';
+import type { Layer, Asset } from '../../types';
 import './CanvasStage.css';
 
 export function CanvasStage() {
@@ -8,6 +9,21 @@ export function CanvasStage() {
   const containerRef = useRef<HTMLDivElement>(null);
   const animationFrameRef = useRef<number | undefined>(undefined);
   const lastTimeRef = useRef<number>(0);
+  
+  // Drag state
+  const dragStateRef = useRef<{
+    isDragging: boolean;
+    draggedLayerId: string | null;
+    startX: number;
+    startY: number;
+    initialTransform: { x: number; y: number } | null;
+  }>({
+    isDragging: false,
+    draggedLayerId: null,
+    startX: 0,
+    startY: 0,
+    initialTransform: null
+  });
   
   const currentProject = useAppStore((state) => state.currentProject);
   const timeline = useAppStore((state) => state.timeline);
@@ -161,25 +177,128 @@ export function CanvasStage() {
     };
   }, [timeline.isPlaying, animate, render, timeline.currentTime]);
 
-  // Handle canvas interactions
-  const handleCanvasClick = useCallback((e: React.MouseEvent) => {
-    if (!canvasRef.current || !currentProject) return;
+  // Helper function to check if a point is within a layer's bounds
+  const isPointInLayer = useCallback((
+    x: number, 
+    y: number, 
+    layer: Layer, 
+    asset: Asset
+  ): boolean => {
+    if (!layer.visible || layer.transform.opacity <= 0) {
+      return false;
+    }
+
+    const { transform } = layer;
+    
+    // Calculate the layer's bounding box (assets are drawn centered)
+    const halfWidth = (asset.width * transform.scaleX) / 2;
+    const halfHeight = (asset.height * transform.scaleY) / 2;
+    
+    // For simplicity, we'll do basic bounds checking without rotation
+    // In a more complex implementation, we'd need to handle rotation properly
+    const layerLeft = transform.x - halfWidth;
+    const layerRight = transform.x + halfWidth;
+    const layerTop = transform.y - halfHeight;
+    const layerBottom = transform.y + halfHeight;
+    
+    return x >= layerLeft && x <= layerRight && y >= layerTop && y <= layerBottom;
+  }, []);
+
+  // Convert screen coordinates to canvas coordinates
+  const screenToCanvas = useCallback((clientX: number, clientY: number) => {
+    if (!canvasRef.current || !currentProject) return { x: 0, y: 0 };
     
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
     
-    // Convert screen coordinates to canvas coordinates
     const scaleX = currentProject.settings.width / rect.width;
     const scaleY = currentProject.settings.height / rect.height;
     
-    const x = (e.clientX - rect.left) * scaleX;
-    const y = (e.clientY - rect.top) * scaleY;
-    
-    console.log('Canvas clicked at:', { x, y });
-    
-    // TODO: Implement layer selection based on click position
-    useAppStore.getState().deselectLayers();
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY
+    };
   }, [currentProject]);
+
+  // Handle mouse down - start drag or select
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    if (!canvasRef.current || !currentProject) return;
+    
+    const { x, y } = screenToCanvas(e.clientX, e.clientY);
+    
+    // Find the topmost layer under the click
+    const { layers, assets } = currentProject;
+    let selectedLayerId: string | null = null;
+    
+    for (let i = layers.length - 1; i >= 0; i--) {
+      const layer = layers[i];
+      const asset = assets[layer.assetId];
+      
+      if (asset && isPointInLayer(x, y, layer, asset)) {
+        selectedLayerId = layer.id;
+        break;
+      }
+    }
+    
+    if (selectedLayerId) {
+      // Select the layer if not already selected
+      if (!canvasState.selectedLayerIds.includes(selectedLayerId)) {
+        useAppStore.getState().selectLayer(selectedLayerId);
+      }
+      
+      // Start dragging
+      const layer = layers.find(l => l.id === selectedLayerId);
+      if (layer && !layer.locked) {
+        dragStateRef.current = {
+          isDragging: true,
+          draggedLayerId: selectedLayerId,
+          startX: x,
+          startY: y,
+          initialTransform: { x: layer.transform.x, y: layer.transform.y }
+        };
+      }
+    } else {
+      // Deselect all layers
+      useAppStore.getState().deselectLayers();
+    }
+  }, [currentProject, isPointInLayer, canvasState.selectedLayerIds, screenToCanvas]);
+
+  // Handle mouse move - drag selected layer
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (!dragStateRef.current.isDragging || !dragStateRef.current.draggedLayerId || !dragStateRef.current.initialTransform) {
+      return;
+    }
+    
+    const { x, y } = screenToCanvas(e.clientX, e.clientY);
+    
+    const deltaX = x - dragStateRef.current.startX;
+    const deltaY = y - dragStateRef.current.startY;
+    
+    const newX = dragStateRef.current.initialTransform.x + deltaX;
+    const newY = dragStateRef.current.initialTransform.y + deltaY;
+    
+    // Update layer position
+    useAppStore.getState().updateLayerTransform(dragStateRef.current.draggedLayerId, {
+      x: newX,
+      y: newY
+    });
+  }, [screenToCanvas]);
+
+  // Handle mouse up - end drag
+  const handleMouseUp = useCallback(() => {
+    dragStateRef.current = {
+      isDragging: false,
+      draggedLayerId: null,
+      startX: 0,
+      startY: 0,
+      initialTransform: null
+    };
+  }, []);
+
+  // Handle canvas click (for compatibility)
+  const handleCanvasClick = useCallback((e: React.MouseEvent) => {
+    // Click is handled by mouseDown, but we keep this for any future click-specific logic
+  }, []);
 
   if (!currentProject) {
     return (
@@ -199,9 +318,13 @@ export function CanvasStage() {
           className="canvas"
           style={{
             width: canvasSize.width,
-            height: canvasSize.height
+            height: canvasSize.height,
+            cursor: dragStateRef.current.isDragging ? 'grabbing' : 'grab'
           }}
-          onClick={handleCanvasClick}
+          onMouseDown={handleMouseDown}
+          onMouseMove={handleMouseMove}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
         />
         
         <div className="canvas-overlay">
