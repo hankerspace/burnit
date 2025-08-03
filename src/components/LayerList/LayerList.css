@@ -164,3 +164,108 @@
   color: var(--color-text-primary);
   background: var(--color-bg-elevated);
 }
+
+/* Drag handle */
+.drag-handle {
+  cursor: grab;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-normal);
+  user-select: none;
+  line-height: 1;
+  opacity: 0;
+  flex-shrink: 0;
+}
+
+.layer-item:hover .drag-handle {
+  opacity: 1;
+}
+
+.drag-handle:hover {
+  color: var(--color-fire-primary);
+  background: var(--color-bg-elevated);
+}
+
+.layer-item[draggable="true"] .drag-handle {
+  cursor: grab;
+}
+
+/* Drag states */
+.layer-item.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+  background: var(--color-bg-secondary);
+  border-color: var(--color-fire-primary);
+  cursor: grabbing;
+}
+
+.layer-item.dragging .drag-handle {
+  cursor: grabbing;
+}
+
+.layer-item.drag-over {
+  border-top: 2px solid var(--color-fire-primary);
+  border-bottom: 2px solid var(--color-fire-primary);
+  background: rgba(255, 107, 53, 0.05);
+}
+
+.layer-item.drag-over::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-fire-primary);
+  border-radius: 1px;
+  z-index: 10;
+}
+
+.layer-item.drag-over::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-fire-primary);
+  border-radius: 1px;
+  z-index: 10;
+}
+
+/* Locked layer drag prevention */
+.layer-item.locked[draggable="false"] .drag-handle {
+  cursor: not-allowed;
+  opacity: 0.3;
+}
+
+.layer-item.locked[draggable="false"]:hover .drag-handle {
+  color: var(--color-text-muted);
+  background: none;
+}
+
+/* Enhanced visual feedback */
+.layer-item:active {
+  transform: scale(0.98);
+}
+
+.layer-item.selected:hover {
+  background: rgba(255, 107, 53, 0.15);
+}
+
+/* Smooth transitions for reordering */
+.layer-items {
+  transition: all var(--transition-normal);
+}
+
+.layer-item {
+  transition: transform var(--transition-normal), opacity var(--transition-normal), background-color var(--transition-normal);
+}
+
+/* Focus states for accessibility */
+.layer-item:focus {
+  outline: 2px solid var(--color-fire-primary);
+  outline-offset: 1px;
+}

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useAppStore } from '../../state';
 import type { Layer, Asset } from '../../types';
 import './LayerList.css';
@@ -11,6 +11,57 @@ export function LayerList() {
   const updateLayer = useAppStore((state) => state.updateLayer);
   const removeLayer = useAppStore((state) => state.removeLayer);
   const duplicateLayer = useAppStore((state) => state.duplicateLayer);
+  const reorderLayers = useAppStore((state) => state.reorderLayers);
+
+  const [draggedLayerId, setDraggedLayerId] = useState<string | null>(null);
+  const [dragOverLayerId, setDragOverLayerId] = useState<string | null>(null);
+
+  const handleDragStart = useCallback((layerId: string) => {
+    setDraggedLayerId(layerId);
+  }, []);
+
+  const handleDragEnd = useCallback(() => {
+    setDraggedLayerId(null);
+    setDragOverLayerId(null);
+  }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent, layerId: string) => {
+    e.preventDefault();
+    setDragOverLayerId(layerId);
+  }, []);
+
+  const handleDragLeave = useCallback(() => {
+    setDragOverLayerId(null);
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent, targetLayerId: string) => {
+    e.preventDefault();
+    
+    if (!draggedLayerId || !currentProject || draggedLayerId === targetLayerId) {
+      setDraggedLayerId(null);
+      setDragOverLayerId(null);
+      return;
+    }
+
+    const currentLayers = [...currentProject.layers];
+    const draggedIndex = currentLayers.findIndex(layer => layer.id === draggedLayerId);
+    const targetIndex = currentLayers.findIndex(layer => layer.id === targetLayerId);
+    
+    if (draggedIndex === -1 || targetIndex === -1) return;
+
+    // Remove dragged layer from current position
+    const [draggedLayer] = currentLayers.splice(draggedIndex, 1);
+    
+    // Insert at new position
+    currentLayers.splice(targetIndex, 0, draggedLayer);
+    
+    // Update layer order
+    const newLayerIds = currentLayers.map(layer => layer.id);
+    reorderLayers(newLayerIds);
+    
+    setDraggedLayerId(null);
+    setDragOverLayerId(null);
+  }, [draggedLayerId, currentProject, reorderLayers]);
 
   if (!currentProject) {
     return (
@@ -50,11 +101,18 @@ export function LayerList() {
                   layer={layer}
                   asset={asset}
                   isSelected={selectedLayerIds.includes(layer.id)}
+                  isDragging={draggedLayerId === layer.id}
+                  isDragOver={dragOverLayerId === layer.id}
                   onSelect={selectLayer}
                   onToggleSelect={toggleLayerSelection}
                   onUpdate={updateLayer}
                   onRemove={removeLayer}
                   onDuplicate={duplicateLayer}
+                  onDragStart={handleDragStart}
+                  onDragEnd={handleDragEnd}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
                 />
               );
             })}
@@ -69,22 +127,36 @@ interface LayerItemProps {
   layer: Layer;
   asset?: Asset;
   isSelected: boolean;
+  isDragging: boolean;
+  isDragOver: boolean;
   onSelect: (layerId: string) => void;
   onToggleSelect: (layerId: string) => void;
   onUpdate: (layerId: string, updates: Partial<Layer>) => void;
   onRemove: (layerId: string) => void;
   onDuplicate: (layerId: string) => void;
+  onDragStart: (layerId: string) => void;
+  onDragEnd: () => void;
+  onDragOver: (e: React.DragEvent, layerId: string) => void;
+  onDragLeave: () => void;
+  onDrop: (e: React.DragEvent, layerId: string) => void;
 }
 
 function LayerItem({
   layer,
   asset,
   isSelected,
+  isDragging,
+  isDragOver,
   onSelect,
   onToggleSelect,
   onUpdate,
   onRemove,
-  onDuplicate
+  onDuplicate,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDragLeave,
+  onDrop
 }: LayerItemProps) {
   const handleClick = useCallback((e: React.MouseEvent) => {
     if (e.metaKey || e.ctrlKey) {
@@ -93,6 +165,20 @@ function LayerItem({
       onSelect(layer.id);
     }
   }, [layer.id, onSelect, onToggleSelect]);
+
+  const handleDragStart = useCallback((e: React.DragEvent) => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', layer.id);
+    onDragStart(layer.id);
+  }, [layer.id, onDragStart]);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    onDragOver(e, layer.id);
+  }, [layer.id, onDragOver]);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    onDrop(e, layer.id);
+  }, [layer.id, onDrop]);
 
   const handleVisibilityToggle = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -150,9 +236,19 @@ function LayerItem({
 
   return (
     <div
-      className={`layer-item ${isSelected ? 'selected' : ''} ${!layer.visible ? 'hidden' : ''} ${layer.locked ? 'locked' : ''}`}
+      className={`layer-item ${isSelected ? 'selected' : ''} ${!layer.visible ? 'hidden' : ''} ${layer.locked ? 'locked' : ''} ${isDragging ? 'dragging' : ''} ${isDragOver ? 'drag-over' : ''}`}
       onClick={handleClick}
+      draggable={!layer.locked}
+      onDragStart={handleDragStart}
+      onDragEnd={onDragEnd}
+      onDragOver={handleDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={handleDrop}
     >
+      <div className="drag-handle">
+        ⋮⋮
+      </div>
+      
       <div className="layer-thumbnail-container">
         {renderThumbnail()}
       </div>

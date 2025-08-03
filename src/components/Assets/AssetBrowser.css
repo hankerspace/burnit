@@ -135,6 +135,82 @@
   padding: 1px 4px;
   border-radius: var(--radius-sm);
   line-height: 1;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.gif-badge, .video-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2px 4px;
+  min-width: 24px;
+}
+
+.frame-count {
+  font-size: 0.5rem;
+  opacity: 0.9;
+}
+
+.playing-indicator {
+  font-size: 0.5rem;
+  animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.asset-duration {
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 0.6rem;
+  font-weight: bold;
+  padding: 1px 4px;
+  border-radius: var(--radius-sm);
+  line-height: 1;
+}
+
+.video-thumbnail:hover .asset-video {
+  border: 1px solid var(--color-fire-primary);
+}
+
+/* Enhanced hover effects */
+.gif-thumbnail:hover,
+.video-thumbnail:hover {
+  transform: scale(1.05);
+  transition: transform var(--transition-normal);
+}
+
+.gif-thumbnail:hover .asset-badge,
+.video-thumbnail:hover .asset-badge {
+  background: var(--color-fire-secondary);
+}
+
+/* Loading states */
+.asset-thumbnail[src=""],
+.asset-video[src=""] {
+  background: linear-gradient(
+    45deg,
+    var(--color-bg-secondary) 25%,
+    var(--color-bg-tertiary) 25%,
+    var(--color-bg-tertiary) 50%,
+    var(--color-bg-secondary) 50%,
+    var(--color-bg-secondary) 75%,
+    var(--color-bg-tertiary) 75%
+  );
+  background-size: 8px 8px;
+  animation: loading-stripes 1s linear infinite;
+}
+
+@keyframes loading-stripes {
+  0% { background-position: 0 0; }
+  100% { background-position: 8px 8px; }
 }
 
 .asset-info {

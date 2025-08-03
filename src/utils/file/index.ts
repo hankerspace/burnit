@@ -1,4 +1,4 @@
-export const SUPPORTED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/jpg'] as const;
+export const SUPPORTED_IMAGE_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'] as const;
 export const SUPPORTED_GIF_TYPES = ['image/gif'] as const;
 export const SUPPORTED_VIDEO_TYPES = ['video/webm'] as const;
 
@@ -23,6 +23,18 @@ export function isGifFile(file: File): boolean {
 
 export function isVideoFile(file: File): boolean {
   return SUPPORTED_VIDEO_TYPES.includes(file.type as any);
+}
+
+export function isWebPFile(file: File): boolean {
+  return file.type === 'image/webp';
+}
+
+export function supportsWebP(): boolean {
+  // Check if the browser supports WebP
+  const canvas = document.createElement('canvas');
+  canvas.width = 1;
+  canvas.height = 1;
+  return canvas.toDataURL('image/webp').indexOf('data:image/webp') === 0;
 }
 
 export function isSupportedFile(file: File): boolean {

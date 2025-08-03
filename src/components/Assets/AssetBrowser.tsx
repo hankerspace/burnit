@@ -2,7 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { useAppStore } from '../../state';
 import { decodeGif } from '../../lib/gif/decode';
 import { createImageAsset, createVideoAsset, supportsWebMVideo } from '../../lib/video/utils';
-import { isImageFile, isGifFile, isVideoFile } from '../../utils/file';
+import { isImageFile, isGifFile, isVideoFile, isWebPFile, supportsWebP } from '../../utils/file';
 import type { Asset } from '../../types';
 import './AssetBrowser.css';
 
@@ -20,7 +20,11 @@ export function AssetBrowser() {
       for (const file of Array.from(files)) {
         let asset: Asset;
         
-        if (isImageFile(file)) {
+        if (isImageFile(file) || isWebPFile(file)) {
+          if (isWebPFile(file) && !supportsWebP()) {
+            alert('WebP images are not supported in this browser');
+            continue;
+          }
           asset = await createImageAsset(file);
         } else if (isGifFile(file)) {
           asset = await decodeGif(file);
@@ -100,7 +104,7 @@ export function AssetBrowser() {
             id="file-input"
             className="file-input"
             multiple
-            accept="image/png,image/jpeg,image/gif,video/webm"
+            accept="image/png,image/jpeg,image/gif,image/webp,video/webm"
             onChange={handleFileInput}
             disabled={isUploading}
           />
@@ -119,7 +123,7 @@ export function AssetBrowser() {
                   or <label htmlFor="file-input" className="upload-link">browse files</label>
                 </p>
                 <p className="text-xs text-muted">
-                  Supports PNG, JPEG, GIF, WebM
+                  Supports PNG, JPEG, GIF, WebP, WebM
                 </p>
               </>
             )}
@@ -154,6 +158,7 @@ interface AssetItemProps {
 
 function AssetItem({ asset, onAddToCanvas }: AssetItemProps) {
   const removeAsset = useAppStore((state) => state.removeAsset);
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
   const handleRemove = useCallback((e: React.MouseEvent) => {
     e.stopPropagation();
@@ -161,6 +166,21 @@ function AssetItem({ asset, onAddToCanvas }: AssetItemProps) {
       removeAsset(asset.id);
     }
   }, [asset.id, asset.name, removeAsset]);
+
+  const handleVideoHover = useCallback((e: React.MouseEvent<HTMLVideoElement>) => {
+    const video = e.currentTarget;
+    video.play().catch(() => {
+      // Ignore play errors (user interaction may be required)
+    });
+    setIsVideoPlaying(true);
+  }, []);
+
+  const handleVideoLeave = useCallback((e: React.MouseEvent<HTMLVideoElement>) => {
+    const video = e.currentTarget;
+    video.pause();
+    video.currentTime = 0;
+    setIsVideoPlaying(false);
+  }, []);
 
   const renderThumbnail = () => {
     switch (asset.kind) {
@@ -181,7 +201,13 @@ function AssetItem({ asset, onAddToCanvas }: AssetItemProps) {
               alt={asset.name}
               loading="lazy"
             />
-            <div className="asset-badge">GIF</div>
+            <div className="asset-badge gif-badge">
+              <span>GIF</span>
+              <span className="frame-count">{asset.frames.length}f</span>
+            </div>
+            <div className="asset-duration">
+              {(asset.totalDurationMs / 1000).toFixed(1)}s
+            </div>
           </div>
         );
       case 'video':
@@ -193,8 +219,17 @@ function AssetItem({ asset, onAddToCanvas }: AssetItemProps) {
               muted
               loop
               playsInline
+              onMouseEnter={handleVideoHover}
+              onMouseLeave={handleVideoLeave}
+              poster=""
             />
-            <div className="asset-badge">WebM</div>
+            <div className="asset-badge video-badge">
+              <span>WebM</span>
+              {isVideoPlaying && <span className="playing-indicator">▶</span>}
+            </div>
+            <div className="asset-duration">
+              {(asset.durationMs / 1000).toFixed(1)}s
+            </div>
           </div>
         );
     }

@@ -164,6 +164,131 @@
   }
 }
 
+/* Quality slider */
+.quality-slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--color-bg-tertiary);
+  outline: none;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+}
+
+.quality-slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-fire-primary);
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all var(--transition-normal);
+}
+
+.quality-slider::-webkit-slider-thumb:hover {
+  background: var(--color-fire-secondary);
+  transform: scale(1.1);
+}
+
+.quality-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--color-fire-primary);
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all var(--transition-normal);
+}
+
+.quality-slider::-moz-range-thumb:hover {
+  background: var(--color-fire-secondary);
+  transform: scale(1.1);
+}
+
+/* Checkbox styling */
+.option-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: normal;
+  margin-bottom: 0;
+}
+
+.option-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-secondary);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  position: relative;
+}
+
+.option-checkbox input[type="checkbox"]:checked {
+  background: var(--color-fire-primary);
+  border-color: var(--color-fire-primary);
+}
+
+.option-checkbox input[type="checkbox"]:checked::after {
+  content: '✓';
+  position: absolute;
+  top: -2px;
+  left: 1px;
+  color: white;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+/* Export progress */
+.export-progress {
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--color-bg-tertiary);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: var(--spacing-sm);
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-fire-primary), var(--color-fire-secondary));
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.progress-message {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  margin: 0;
+  text-align: center;
+}
+
+/* Disabled state */
+.format-btn:disabled,
+.quality-slider:disabled,
+.option-checkbox input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.format-btn:disabled:hover {
+  border-color: var(--color-border);
+  background: var(--color-bg-secondary);
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .export-dialog {
