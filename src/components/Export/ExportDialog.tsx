@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useAppStore } from '../../state';
+import { exportProjectAsPNG, exportProjectAsJPEG, downloadBlob, generateExportFilename } from '../../lib/export';
 import './ExportDialog.css';
 
 export function ExportDialog() {
@@ -8,6 +9,7 @@ export function ExportDialog() {
   const [isExporting, setIsExporting] = useState(false);
   
   const currentProject = useAppStore((state) => state.currentProject);
+  const timeline = useAppStore((state) => state.timeline);
 
   const handleExport = useCallback(async () => {
     if (!currentProject) return;
@@ -15,8 +17,19 @@ export function ExportDialog() {
     setIsExporting(true);
     
     try {
-      // For now, just show an alert - actual export implementation would go here
-      alert(`Export as ${exportFormat.toUpperCase()} - Not implemented yet`);
+      const currentTime = timeline.currentTime;
+      const filename = generateExportFilename(currentProject.name, exportFormat);
+      
+      if (exportFormat === 'png') {
+        const blob = await exportProjectAsPNG(currentProject, currentTime);
+        downloadBlob(blob, filename);
+      } else if (exportFormat === 'jpeg') {
+        const blob = await exportProjectAsJPEG(currentProject, currentTime, 0.9);
+        downloadBlob(blob, filename);
+      } else {
+        // For GIF and WebM, show not implemented message for now
+        alert(`Export as ${exportFormat.toUpperCase()} - Not implemented yet`);
+      }
     } catch (error) {
       console.error('Export error:', error);
       alert('Export failed. Please try again.');
@@ -24,7 +37,7 @@ export function ExportDialog() {
       setIsExporting(false);
       setIsOpen(false);
     }
-  }, [currentProject, exportFormat]);
+  }, [currentProject, exportFormat, timeline.currentTime]);
 
   if (!isOpen) {
     return (
