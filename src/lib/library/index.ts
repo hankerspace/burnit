@@ -27,6 +27,7 @@ const LIBRARY_ASSETS: LibraryAssetInfo[] = [
   { filename: 'fireD.gif', category: 'fire', displayName: 'Fire D' },
   { filename: 'smokeA.gif', category: 'smoke', displayName: 'Smoke A' },
   { filename: 'smokeB.gif', category: 'smoke', displayName: 'Smoke B' },
+      { filename: 'smokeC.gif', category: 'smoke', displayName: 'Smoke C' },
 ];
 
 class LibraryManager {
