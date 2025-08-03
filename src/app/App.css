@@ -1,0 +1,147 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: var(--color-bg-primary);
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+  min-height: 60px;
+}
+
+.app-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.app-title h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.app-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.app-content {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.app-sidebar-left {
+  width: 300px;
+  min-width: 250px;
+  max-width: 400px;
+  background: var(--color-bg-secondary);
+  border-right: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.app-sidebar-right {
+  width: 280px;
+  min-width: 250px;
+  max-width: 350px;
+  background: var(--color-bg-secondary);
+  border-left: 1px solid var(--color-border);
+  overflow: hidden;
+}
+
+.app-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: var(--color-bg-primary);
+}
+
+.loading-content {
+  text-align: center;
+  max-width: 300px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  margin: 0 auto var(--spacing-lg);
+  background: linear-gradient(135deg, var(--color-fire-primary), var(--color-fire-secondary));
+  border-radius: 50%;
+}
+
+.loading-content h2 {
+  margin: 0 0 var(--spacing-sm);
+  font-size: 2rem;
+}
+
+.loading-content p {
+  margin: 0;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .app-sidebar-right {
+    width: 250px;
+  }
+}
+
+@media (max-width: 968px) {
+  .app-sidebar-left {
+    width: 250px;
+  }
+  
+  .app-sidebar-right {
+    width: 220px;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  
+  .app-title h1 {
+    font-size: 1.25rem;
+  }
+  
+  .app-sidebar-left,
+  .app-sidebar-right {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    z-index: 10;
+    transform: translateX(-100%);
+    transition: transform var(--transition-normal);
+  }
+  
+  .app-sidebar-right {
+    right: 0;
+    transform: translateX(100%);
+  }
+  
+  .app-sidebar-left.is-open,
+  .app-sidebar-right.is-open {
+    transform: translateX(0);
+  }
+}

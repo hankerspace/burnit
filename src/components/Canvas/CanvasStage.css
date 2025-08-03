@@ -1,0 +1,194 @@
+.canvas-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-primary);
+  position: relative;
+  overflow: hidden;
+  min-height: 400px;
+}
+
+.canvas-container {
+  position: relative;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+  background: var(--color-bg-elevated);
+}
+
+.canvas {
+  display: block;
+  background: transparent;
+  image-rendering: crisp-edges;
+  image-rendering: pixelated;
+}
+
+.canvas-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.canvas-info {
+  position: absolute;
+  bottom: var(--spacing-sm);
+  left: var(--spacing-sm);
+  background: rgba(0, 0, 0, 0.7);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  backdrop-filter: blur(4px);
+}
+
+.canvas-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 400px;
+  height: 300px;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-secondary);
+}
+
+/* Canvas controls */
+.canvas-controls {
+  position: absolute;
+  top: var(--spacing-md);
+  right: var(--spacing-md);
+  display: flex;
+  gap: var(--spacing-sm);
+  z-index: 2;
+}
+
+.canvas-controls .btn {
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(4px);
+}
+
+.canvas-controls .btn:hover {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* Zoom controls */
+.zoom-controls {
+  position: absolute;
+  bottom: var(--spacing-md);
+  right: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background: rgba(0, 0, 0, 0.7);
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(4px);
+  z-index: 2;
+}
+
+.zoom-slider {
+  width: 100px;
+}
+
+/* Grid overlay */
+.grid-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  opacity: 0.1;
+  background-image: 
+    linear-gradient(var(--color-text-primary) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-text-primary) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Selection handles */
+.selection-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: var(--color-fire-primary);
+  border: 1px solid white;
+  border-radius: 2px;
+  cursor: pointer;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+}
+
+.selection-handle.corner {
+  cursor: nw-resize;
+}
+
+.selection-handle.edge-h {
+  cursor: ew-resize;
+}
+
+.selection-handle.edge-v {
+  cursor: ns-resize;
+}
+
+.selection-handle.corner.se {
+  cursor: se-resize;
+}
+
+.selection-handle.corner.ne {
+  cursor: ne-resize;
+}
+
+.selection-handle.corner.sw {
+  cursor: sw-resize;
+}
+
+/* Transform indicators */
+.transform-indicator {
+  position: absolute;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.rotation-indicator {
+  border: 2px dashed var(--color-fire-primary);
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+.scale-indicator {
+  border: 1px solid var(--color-fire-secondary);
+  background: rgba(255, 149, 0, 0.1);
+}
+
+/* Animation states */
+.canvas.is-animating {
+  transition: none;
+}
+
+.canvas.is-rendering {
+  cursor: progress;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .canvas-stage {
+    min-height: 300px;
+  }
+  
+  .canvas-controls,
+  .zoom-controls {
+    position: static;
+    margin: var(--spacing-sm);
+  }
+  
+  .canvas-info {
+    position: static;
+    margin: var(--spacing-sm);
+    display: inline-block;
+  }
+}
