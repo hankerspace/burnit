@@ -9,7 +9,8 @@ export const ALL_SUPPORTED_TYPES = [
 ] as const;
 
 export function getFileExtension(filename: string): string {
-  return filename.split('.').pop()?.toLowerCase() || '';
+  const parts = filename.split('.');
+  return parts.length > 1 ? parts.pop()?.toLowerCase() || '' : '';
 }
 
 export function isImageFile(file: File): boolean {
@@ -54,7 +55,8 @@ export function formatFileSize(bytes: number): string {
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+  const size = bytes / Math.pow(k, i);
+  return `${size % 1 === 0 ? size.toFixed(0) : size.toFixed(1)} ${sizes[i]}`;
 }
 
 export async function readFileAsArrayBuffer(file: File): Promise<ArrayBuffer> {

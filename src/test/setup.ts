@@ -15,7 +15,7 @@ global.createImageBitmap = vi.fn().mockResolvedValue({
 
 // Mock crypto.randomUUID
 Object.defineProperty(global.crypto, 'randomUUID', {
-  value: vi.fn(() => 'mock-uuid-123'),
+  value: vi.fn(() => '123e4567-e89b-12d3-a456-426614174000'),
 });
 
 // Mock HTMLVideoElement

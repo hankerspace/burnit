@@ -25,6 +25,7 @@
     "@radix-ui/react-select": "^2.2.5",
     "@radix-ui/react-slider": "^1.3.5",
     "@radix-ui/react-tooltip": "^1.2.7",
+    "gifenc": "^1.0.3",
     "gifuct-js": "^2.1.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
