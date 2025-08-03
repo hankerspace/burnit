@@ -71,8 +71,7 @@ export async function decodeGif(file: File): Promise<GifAsset> {
     // Create ImageBitmap from current canvas state
     const bitmap = await createImageBitmap(canvas);
     
-    // Convert delay from centiseconds to milliseconds (minimum 10ms)
-    const durationMs = Math.max(frame.delay * 10, 10);
+    const durationMs = Math.max(frame.delay, 10);
     
     gifFrames.push({
       bitmap,

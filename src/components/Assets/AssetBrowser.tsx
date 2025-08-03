@@ -147,13 +147,17 @@ export function AssetBrowser() {
               <p className="text-muted">No assets yet. Add some files to get started!</p>
             </div>
           ) : (
-            assetList.map((asset) => (
-              <AssetItem
-                key={asset.id}
-                asset={asset}
-                onAddToCanvas={() => handleAddToCanvas(asset)}
-              />
-            ))
+            assetList.map((asset) => {
+              const isLibraryAsset = !assets[asset.id]; // If not in project assets, it's a library asset
+              return (
+                <AssetItem
+                  key={asset.id}
+                  asset={asset}
+                  isLibraryAsset={isLibraryAsset}
+                  onAddToCanvas={() => handleAddToCanvas(asset, isLibraryAsset)}
+                />
+              );
+            })
           )}
         </div>
       </div>
@@ -163,10 +167,11 @@ export function AssetBrowser() {
 
 interface AssetItemProps {
   asset: Asset;
+  isLibraryAsset?: boolean;
   onAddToCanvas: () => void;
 }
 
-function AssetItem({ asset, onAddToCanvas }: AssetItemProps) {
+function AssetItem({ asset, isLibraryAsset = false, onAddToCanvas }: AssetItemProps) {
   const removeAsset = useAppStore((state) => state.removeAsset);
 
   const handleRemove = useCallback((e: React.MouseEvent) => {
@@ -236,13 +241,15 @@ function AssetItem({ asset, onAddToCanvas }: AssetItemProps) {
         </div>
       </div>
       
-      <button
-        className="asset-remove btn btn-small btn-icon"
-        onClick={handleRemove}
-        title="Remove asset"
-      >
-        ×
-      </button>
+      {!isLibraryAsset && (
+        <button
+          className="asset-remove btn btn-small btn-icon"
+          onClick={handleRemove}
+          title="Remove asset"
+        >
+          ×
+        </button>
+      )}
     </div>
   );
 }

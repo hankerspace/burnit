@@ -16,6 +16,9 @@ function App() {
     if (!currentProject) {
       useAppStore.getState().createNewProject('Untitled Project');
     }
+    
+    // Load the asset library
+    useAppStore.getState().loadAssetLibrary();
   }, [currentProject]);
 
   if (!currentProject) {

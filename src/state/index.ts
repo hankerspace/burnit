@@ -24,6 +24,9 @@ interface AppState {
   // Canvas state
   canvas: CanvasState;
   
+  // Library state
+  library: AssetLibrary;
+  
   // UI state
   selectedTool: 'select' | 'move' | 'rotate' | 'scale';
   showGrid: boolean;
@@ -72,6 +75,10 @@ interface AppState {
   setShowGrid: (show: boolean) => void;
   setSnapToGrid: (snap: boolean) => void;
   setGridSize: (size: number) => void;
+  
+  // Library actions
+  loadAssetLibrary: () => Promise<void>;
+  addLibraryAssetToProject: (assetId: UUID, name?: string) => UUID | null;
 }
 
 const DEFAULT_COMPOSITION_SETTINGS: CompositionSettings = {
@@ -111,6 +118,7 @@ export const useAppStore = create<AppState>()(
     currentProject: null,
     timeline: DEFAULT_TIMELINE_STATE,
     canvas: DEFAULT_CANVAS_STATE,
+    library: { categories: [], isLoaded: false, isLoading: false },
     selectedTool: 'select',
     showGrid: false,
     snapToGrid: false,
@@ -443,6 +451,63 @@ export const useAppStore = create<AppState>()(
 
     setGridSize: (size: number) => {
       set({ gridSize: Math.max(5, Math.min(100, size)) });
+    },
+
+    // Library actions
+    loadAssetLibrary: async () => {
+      try {
+        const library = await loadLibrary();
+        set({ library });
+        
+        // Subscribe to library updates
+        libraryManager.subscribe((updatedLibrary) => {
+          set({ library: updatedLibrary });
+        });
+      } catch (error) {
+        console.error('Failed to load asset library:', error);
+        set({ 
+          library: { categories: [], isLoaded: false, isLoading: false } 
+        });
+      }
+    },
+
+    addLibraryAssetToProject: (assetId: UUID, name?: string) => {
+      const { currentProject, library } = get();
+      if (!currentProject) {
+        console.warn('No current project to add library asset to');
+        return null;
+      }
+
+      // Find the asset in the library
+      const libraryAsset = library.categories
+        .flatMap(category => category.assets)
+        .find(asset => asset.id === assetId);
+
+      if (!libraryAsset) {
+        console.warn(`Library asset with id ${assetId} not found`);
+        return null;
+      }
+
+      // Create a copy of the asset with a new ID for the project
+      const projectAsset: Asset = {
+        ...libraryAsset,
+        id: generateId(),
+        name: name || libraryAsset.name
+      };
+
+      // Add the asset to the project
+      set({
+        currentProject: {
+          ...currentProject,
+          assets: { ...currentProject.assets, [projectAsset.id]: projectAsset },
+          updatedAt: new Date().toISOString()
+        }
+      });
+
+      // Create a layer for the asset
+      const layerId = get().addLayer(projectAsset.id, projectAsset.name);
+      
+      return layerId;
     }
   }))
 );
