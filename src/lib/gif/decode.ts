@@ -74,7 +74,7 @@ export async function decodeGif(file: File): Promise<GifAsset> {
     // Convert delay from centiseconds to milliseconds
     // Some GIFs have 0 delay which means "use default", typically 100ms
     // Browsers typically enforce a minimum of 20ms for performance
-    let durationMs = frame.delay * 10;
+    let durationMs = frame.delay;
     if (durationMs === 0) {
       durationMs = 100; // Default frame duration (100ms = 10 fps)
     } else if (durationMs < 20) {
