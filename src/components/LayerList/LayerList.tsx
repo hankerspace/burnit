@@ -221,14 +221,25 @@ function LayerItem({
         return (
           <div className="layer-thumbnail gif-thumbnail">
             <img src={asset.src} alt={asset.name} loading="lazy" />
-            <div className="layer-badge">GIF</div>
+            <div className="layer-badge gif-badge">
+              <span>GIF</span>
+              <span className="frame-count">{asset.frames.length}f</span>
+            </div>
+            <div className="layer-duration">
+              {(asset.totalDurationMs / 1000).toFixed(1)}s
+            </div>
           </div>
         );
       case 'video':
         return (
           <div className="layer-thumbnail video-thumbnail">
             <video src={asset.src} className="layer-video" muted />
-            <div className="layer-badge">WebM</div>
+            <div className="layer-badge video-badge">
+              <span>WebM</span>
+            </div>
+            <div className="layer-duration">
+              {(asset.durationMs / 1000).toFixed(1)}s
+            </div>
           </div>
         );
     }
@@ -262,6 +273,12 @@ function LayerItem({
             {Math.round(layer.transform.opacity * 100)}% opacity
             {layer.transform.rotationDeg !== 0 && (
               <span> • {layer.transform.rotationDeg}° rotation</span>
+            )}
+            {asset.kind === 'gif' && (
+              <span> • {asset.frames.length} frames, {(asset.totalDurationMs / 1000).toFixed(1)}s</span>
+            )}
+            {asset.kind === 'video' && (
+              <span> • {(asset.durationMs / 1000).toFixed(1)}s duration</span>
             )}
           </div>
         )}

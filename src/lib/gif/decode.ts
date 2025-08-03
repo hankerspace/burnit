@@ -71,8 +71,14 @@ export async function decodeGif(file: File): Promise<GifAsset> {
     // Create ImageBitmap from current canvas state
     const bitmap = await createImageBitmap(canvas);
     
-    // Convert delay from centiseconds to milliseconds (minimum 10ms)
-    const durationMs = Math.max(frame.delay * 10, 10);
+    // Convert delay from centiseconds to milliseconds (minimum 10ms, maximum 2000ms for safety)
+    // Some GIFs have 0 delay which means "use default", typically 100ms
+    let durationMs = frame.delay * 10;
+    if (durationMs === 0) {
+      durationMs = 100; // Default frame duration
+    } else {
+      durationMs = Math.max(Math.min(durationMs, 2000), 10); // Clamp between 10ms and 2s
+    }
     
     gifFrames.push({
       bitmap,

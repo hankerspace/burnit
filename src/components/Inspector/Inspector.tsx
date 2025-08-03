@@ -6,6 +6,7 @@ export function Inspector() {
   const selectedLayerIds = useAppStore((state) => state.canvas.selectedLayerIds);
   const updateLayerTransform = useAppStore((state) => state.updateLayerTransform);
   const updateLayer = useAppStore((state) => state.updateLayer);
+  const updateProjectSettings = useAppStore((state) => state.updateProjectSettings);
 
   if (!currentProject) {
     return (
@@ -31,8 +32,121 @@ export function Inspector() {
           <h3>Inspector</h3>
         </div>
         <div className="panel-content">
-          <div className="empty-state">
-            <p className="text-muted">Select a layer to edit its properties</p>
+          <div className="inspector-sections">
+            {/* Project Settings */}
+            <section className="inspector-section">
+              <h4 className="section-title">Project Settings</h4>
+              
+              <div className="property-row">
+                <div className="property-group">
+                  <label className="property-label">Width</label>
+                  <input
+                    type="number"
+                    min="100"
+                    max="4096"
+                    step="1"
+                    className="input"
+                    value={currentProject.settings.width}
+                    onChange={(e) => updateProjectSettings({ width: parseInt(e.target.value) || 1920 })}
+                  />
+                </div>
+                
+                <div className="property-group">
+                  <label className="property-label">Height</label>
+                  <input
+                    type="number"
+                    min="100"
+                    max="4096"
+                    step="1"
+                    className="input"
+                    value={currentProject.settings.height}
+                    onChange={(e) => updateProjectSettings({ height: parseInt(e.target.value) || 1080 })}
+                  />
+                </div>
+              </div>
+              
+              <div className="property-group">
+                <label className="property-label">FPS</label>
+                <input
+                  type="number"
+                  min="1"
+                  max="60"
+                  step="1"
+                  className="input"
+                  value={currentProject.settings.fps}
+                  onChange={(e) => updateProjectSettings({ fps: parseInt(e.target.value) || 30 })}
+                />
+              </div>
+              
+              <div className="property-group">
+                <label className="property-label">Duration</label>
+                <div className="property-row">
+                  <select
+                    className="input"
+                    value={currentProject.settings.loopDurationMs === 'auto' ? 'auto' : 'custom'}
+                    onChange={(e) => {
+                      if (e.target.value === 'auto') {
+                        updateProjectSettings({ loopDurationMs: 'auto' });
+                      } else {
+                        updateProjectSettings({ loopDurationMs: 5000 });
+                      }
+                    }}
+                  >
+                    <option value="auto">Auto (from assets)</option>
+                    <option value="custom">Custom</option>
+                  </select>
+                  
+                  {currentProject.settings.loopDurationMs !== 'auto' && (
+                    <input
+                      type="number"
+                      min="100"
+                      max="60000"
+                      step="100"
+                      className="input"
+                      value={currentProject.settings.loopDurationMs}
+                      onChange={(e) => updateProjectSettings({ loopDurationMs: parseInt(e.target.value) || 5000 })}
+                      placeholder="ms"
+                    />
+                  )}
+                </div>
+              </div>
+              
+              <div className="property-group">
+                <label className="property-label">Background</label>
+                <div className="property-row">
+                  <select
+                    className="input"
+                    value={currentProject.settings.background.type}
+                    onChange={(e) => {
+                      const type = e.target.value as 'transparent' | 'color';
+                      if (type === 'transparent') {
+                        updateProjectSettings({ background: { type: 'transparent' } });
+                      } else {
+                        updateProjectSettings({ background: { type: 'color', color: '#000000' } });
+                      }
+                    }}
+                  >
+                    <option value="transparent">Transparent</option>
+                    <option value="color">Color</option>
+                  </select>
+                  
+                  {currentProject.settings.background.type === 'color' && (
+                    <input
+                      type="color"
+                      className="input color-input"
+                      value={currentProject.settings.background.color || '#000000'}
+                      onChange={(e) => updateProjectSettings({ 
+                        background: { type: 'color', color: e.target.value } 
+                      })}
+                    />
+                  )}
+                </div>
+              </div>
+            </section>
+            
+            <div className="empty-state" style={{ marginTop: '2rem' }}>
+              <p className="text-muted">Select a layer to edit its properties</p>
+            </div>
           </div>
         </div>
       </div>
