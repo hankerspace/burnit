@@ -1,4 +1,5 @@
 import { useAppStore } from '../../state';
+import { getEffectiveDuration } from '../../lib/gif/decode';
 import './Inspector.css';
 
 export function Inspector() {
@@ -6,6 +7,7 @@ export function Inspector() {
   const selectedLayerIds = useAppStore((state) => state.canvas.selectedLayerIds);
   const updateLayerTransform = useAppStore((state) => state.updateLayerTransform);
   const updateLayer = useAppStore((state) => state.updateLayer);
+  const updateAsset = useAppStore((state) => state.updateAsset);
   const updateProjectSettings = useAppStore((state) => state.updateProjectSettings);
 
   if (!currentProject) {
@@ -328,8 +330,46 @@ export function Inspector() {
                     </div>
                     
                     <div className="detail-row">
-                      <span className="detail-label">Duration:</span>
+                      <span className="detail-label">Original Duration:</span>
                       <span className="detail-value">{(asset.totalDurationMs / 1000).toFixed(1)}s</span>
+                    </div>
+                    
+                    <div className="detail-row">
+                      <span className="detail-label">Current Duration:</span>
+                      <span className="detail-value">{(getEffectiveDuration(asset) / 1000).toFixed(1)}s</span>
+                    </div>
+                    
+                    {/* GIF Duration Controls */}
+                    <div className="property-group" style={{ marginTop: '1rem' }}>
+                      <label className="property-label">Custom Duration</label>
+                      <div className="property-row">
+                        <input
+                          type="number"
+                          min="100"
+                          max="30000"
+                          step="100"
+                          className="input"
+                          value={asset.customDurationMs || asset.totalDurationMs}
+                          onChange={(e) => {
+                            const customDuration = parseInt(e.target.value) || asset.totalDurationMs;
+                            updateAsset(asset.id, { 
+                              customDurationMs: customDuration === asset.totalDurationMs ? undefined : customDuration
+                            });
+                          }}
+                          placeholder="Duration in ms"
+                        />
+                        <button
+                          className="btn btn-small"
+                          onClick={() => updateAsset(asset.id, { customDurationMs: undefined })}
+                          disabled={!asset.customDurationMs}
+                          title="Reset to original duration"
+                        >
+                          Reset
+                        </button>
+                      </div>
+                      <div className="property-hint text-xs text-muted">
+                        Adjust playback speed without changing frames
+                      </div>
                     </div>
                   </>
                 )}

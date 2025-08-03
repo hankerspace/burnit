@@ -83,6 +83,12 @@ export async function decodeGif(file: File): Promise<GifAsset> {
       durationMs = 5000; // Maximum reasonable frame duration (5 seconds)
     }
     
+    // Additional validation for common GIF timing issues
+    if (durationMs > 1000 && frames.length > 10) {
+      // If we have many frames and long delays, cap the delay to prevent excessively long animations
+      durationMs = Math.min(durationMs, 500);
+    }
+    
     gifFrames.push({
       bitmap,
       durationMs
@@ -120,14 +126,32 @@ export function getFrameAtTime(gifAsset: GifAsset, timeMs: number): GifFrame {
     throw new Error('No frames in GIF asset');
   }
 
+  // Use custom duration if set, otherwise use calculated duration
+  const effectiveDurationMs = gifAsset.customDurationMs || gifAsset.totalDurationMs;
+  
   // Handle looping
-  const loopTime = timeMs % gifAsset.totalDurationMs;
-  let accumulatedTime = 0;
-
-  for (const frame of gifAsset.frames) {
-    accumulatedTime += frame.durationMs;
-    if (loopTime < accumulatedTime) {
-      return frame;
+  const loopTime = timeMs % effectiveDurationMs;
+  
+  // If using custom duration, scale the timing
+  if (gifAsset.customDurationMs) {
+    const scaleFactor = gifAsset.customDurationMs / gifAsset.totalDurationMs;
+    const scaledTime = loopTime / scaleFactor;
+    
+    let accumulatedTime = 0;
+    for (const frame of gifAsset.frames) {
+      accumulatedTime += frame.durationMs;
+      if (scaledTime < accumulatedTime) {
+        return frame;
+      }
+    }
+  } else {
+    // Use original timing
+    let accumulatedTime = 0;
+    for (const frame of gifAsset.frames) {
+      accumulatedTime += frame.durationMs;
+      if (loopTime < accumulatedTime) {
+        return frame;
+      }
     }
   }
 
@@ -140,17 +164,38 @@ export function getFrameIndexAtTime(gifAsset: GifAsset, timeMs: number): number 
     return 0;
   }
 
-  const loopTime = timeMs % gifAsset.totalDurationMs;
-  let accumulatedTime = 0;
-
-  for (let i = 0; i < gifAsset.frames.length; i++) {
-    accumulatedTime += gifAsset.frames[i].durationMs;
-    if (loopTime < accumulatedTime) {
-      return i;
+  // Use custom duration if set, otherwise use calculated duration
+  const effectiveDurationMs = gifAsset.customDurationMs || gifAsset.totalDurationMs;
+  const loopTime = timeMs % effectiveDurationMs;
+  
+  // If using custom duration, scale the timing
+  if (gifAsset.customDurationMs) {
+    const scaleFactor = gifAsset.customDurationMs / gifAsset.totalDurationMs;
+    const scaledTime = loopTime / scaleFactor;
+    
+    let accumulatedTime = 0;
+    for (let i = 0; i < gifAsset.frames.length; i++) {
+      accumulatedTime += gifAsset.frames[i].durationMs;
+      if (scaledTime < accumulatedTime) {
+        return i;
+      }
+    }
+  } else {
+    // Use original timing
+    let accumulatedTime = 0;
+    for (let i = 0; i < gifAsset.frames.length; i++) {
+      accumulatedTime += gifAsset.frames[i].durationMs;
+      if (loopTime < accumulatedTime) {
+        return i;
+      }
     }
   }
 
   return gifAsset.frames.length - 1;
+}
+
+export function getEffectiveDuration(gifAsset: GifAsset): number {
+  return gifAsset.customDurationMs || gifAsset.totalDurationMs;
 }
 
 export function disposeGifAsset(gifAsset: GifAsset): void {

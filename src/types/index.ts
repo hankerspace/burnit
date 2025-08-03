@@ -18,6 +18,7 @@ export interface GifAsset extends AssetBase {
   kind: 'gif';
   frames: GifFrame[];
   totalDurationMs: number;
+  customDurationMs?: number; // User-defined duration override
   loopCount?: number | 'infinite';
 }
 

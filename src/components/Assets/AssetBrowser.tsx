@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import { useAppStore } from '../../state';
 import { decodeGif } from '../../lib/gif/decode';
 import { createImageAsset, createVideoAsset, supportsWebMVideo } from '../../lib/video/utils';
+import { extractWebMFrames, shouldTreatWebMAsAnimated } from '../../lib/video/webm-frames';
 import { isImageFile, isGifFile, isVideoFile, isWebPFile, supportsWebP } from '../../utils/file';
 import { GifThumbnail } from '../GifThumbnail';
 import type { Asset } from '../../types';
@@ -34,7 +35,19 @@ export function AssetBrowser() {
             alert('WebM video format is not supported in this browser');
             continue;
           }
-          asset = await createVideoAsset(file);
+          
+          // Check if WebM should be treated as animated frames
+          if (shouldTreatWebMAsAnimated(file)) {
+            try {
+              asset = await extractWebMFrames(file, { frameRate: 30, maxFrames: 300 });
+              console.log('WebM imported as animated frames:', asset);
+            } catch (error) {
+              console.warn('Failed to extract WebM frames, falling back to video:', error);
+              asset = await createVideoAsset(file);
+            }
+          } else {
+            asset = await createVideoAsset(file);
+          }
         } else {
           alert(`Unsupported file format: ${file.type}`);
           continue;
