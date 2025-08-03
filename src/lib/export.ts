@@ -1,7 +1,7 @@
 import type { Project, ExportOptions } from '../types';
 import { exportGif } from './gif/encode';
 import { exportWebM, exportPNG, exportJPEG, supportsWebMRecording } from './media/recorder';
-import { clearCanvas, drawLayer } from './canvas/draw';
+import { clearCanvas, drawLayer, drawLayerAsync } from './canvas/draw';
 
 export interface ExportProgress {
   stage: 'preparing' | 'rendering' | 'encoding' | 'complete';
@@ -270,12 +270,24 @@ export class ExportService {
       ? { type: 'transparent' as const }
       : project.settings.background;
 
-    // Animation loop to feed frames to MediaRecorder
+    // Start MediaRecorder first
+    const recordingPromise = exportWebM(canvas, {
+      width,
+      height,
+      fps,
+      videoBitsPerSecond: 2500000,
+      loopDurationMs,
+      background
+    });
+
+    // Animation loop that runs in sync with MediaRecorder
     const frameCount = Math.ceil((loopDurationMs / 1000) * fps);
     let currentFrame = 0;
+    let animationStart = performance.now();
     
-    const animate = () => {
-      const currentTime = (currentFrame / frameCount) * loopDurationMs;
+    const animate = async () => {
+      const elapsed = performance.now() - animationStart;
+      const currentTime = (elapsed % loopDurationMs);
       
       // Clear and draw frame
       clearCanvas(drawContext, background);
@@ -283,28 +295,28 @@ export class ExportService {
       for (const layer of project.layers) {
         const asset = project.assets[layer.assetId];
         if (asset && layer.visible) {
-          drawLayer(drawContext, layer, asset, currentTime);
+          await drawLayerAsync(drawContext, layer, asset, currentTime);
         }
       }
       
       currentFrame++;
       
       // Update progress
-      const progress = 25 + (currentFrame / frameCount) * 50;
+      const progress = 25 + Math.min((elapsed / loopDurationMs) * 50, 50);
       onProgress?.({
         stage: 'rendering',
         progress: Math.min(progress, 75),
         message: `Recording frame ${currentFrame}/${frameCount}...`
       });
       
-      if (currentFrame < frameCount) {
-        // Continue animation
-        setTimeout(animate, 1000 / fps);
+      // Continue animation until recording stops
+      if (elapsed < loopDurationMs + 100) { // Small buffer
+        requestAnimationFrame(animate);
       }
     };
 
     // Start animation
-    animate();
+    requestAnimationFrame(animate);
 
     onProgress?.({
       stage: 'encoding',
@@ -313,14 +325,7 @@ export class ExportService {
     });
 
     try {
-      const blob = await exportWebM(canvas, {
-        width,
-        height,
-        fps,
-        loopDurationMs,
-        background,
-        videoBitsPerSecond: 2500000
-      });
+      const blob = await recordingPromise;
 
       onProgress?.({
         stage: 'complete',

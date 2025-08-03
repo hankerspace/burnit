@@ -1,7 +1,7 @@
 // @ts-ignore - gifenc doesn't have TypeScript definitions
 import { GIFEncoder, quantize, applyPalette } from 'gifenc';
 import type { Asset, Layer, CompositionSettings } from '../../types';
-import { clearCanvas, drawLayer } from '../canvas/draw';
+import { clearCanvas, drawLayerAsync } from '../canvas/draw';
 
 export interface GifExportOptions {
   width: number;
@@ -26,12 +26,14 @@ export async function exportGif(
   const frameCount = Math.ceil((loopDurationMs / 1000) * fps);
   const frameDuration = Math.round(1000 / fps); // milliseconds per frame
   
-  // Create offscreen canvas for rendering
-  const canvas = new OffscreenCanvas(width, height);
+  // Create canvas for rendering - use regular canvas for better video support
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
   const ctx = canvas.getContext('2d');
   
   if (!ctx) {
-    throw new Error('Could not get 2D context from OffscreenCanvas');
+    throw new Error('Could not get 2D context from canvas');
   }
   
   const drawContext = { ctx, width, height };
@@ -47,7 +49,7 @@ export async function exportGif(
     for (const layer of layers) {
       const asset = assets[layer.assetId];
       if (asset && layer.visible) {
-        drawLayer(drawContext, layer, asset, currentTime);
+        await drawLayerAsync(drawContext, layer, asset, currentTime);
       }
     }
     

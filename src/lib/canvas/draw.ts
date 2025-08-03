@@ -65,6 +65,133 @@ export function drawLayer(
   ctx.restore();
 }
 
+export async function drawLayerAsync(
+  drawContext: DrawContext,
+  layer: Layer,
+  asset: Asset,
+  currentTimeMs: number = 0
+): Promise<void> {
+  if (!layer.visible || layer.transform.opacity <= 0) {
+    return;
+  }
+
+  const { ctx } = drawContext;
+  
+  // Save current context state
+  ctx.save();
+  
+  // Apply layer transform
+  applyTransform(ctx, layer.transform);
+  
+  // Apply opacity
+  ctx.globalAlpha = layer.transform.opacity;
+  
+  // Apply blend mode (for now only 'normal' is supported)
+  ctx.globalCompositeOperation = 'source-over';
+  
+  try {
+    // Draw the asset based on its type
+    switch (asset.kind) {
+      case 'image':
+        drawImageAsset(ctx, asset);
+        break;
+      case 'gif':
+        drawGifAsset(ctx, asset, currentTimeMs);
+        break;
+      case 'video':
+        await drawVideoAssetAsync(ctx, asset, currentTimeMs);
+        break;
+    }
+  } catch (error) {
+    console.warn('Error drawing layer:', error);
+  }
+  
+  // Restore context state
+  ctx.restore();
+}
+
+function drawVideoAsset(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+  asset: Asset & { kind: 'video' },
+  currentTimeMs: number
+): void {
+  if (!asset.videoEl) {
+    return;
+  }
+  
+  // Seek video to current time (modulo duration for looping)
+  const loopTime = currentTimeMs % asset.durationMs;
+  const targetTime = loopTime / 1000;
+  
+  // Always seek for exports to ensure frame accuracy
+  asset.videoEl.currentTime = targetTime;
+  
+  // Draw video frame
+  try {
+    ctx.drawImage(
+      asset.videoEl,
+      -asset.width / 2,
+      -asset.height / 2,
+      asset.width,
+      asset.height
+    );
+  } catch (error) {
+    // Video might not be ready yet
+    console.warn('Error drawing video frame:', error);
+  }
+}
+
+async function drawVideoAssetAsync(
+  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
+  asset: Asset & { kind: 'video' },
+  currentTimeMs: number
+): Promise<void> {
+  if (!asset.videoEl) {
+    return;
+  }
+  
+  // Seek video to current time (modulo duration for looping)
+  const loopTime = currentTimeMs % asset.durationMs;
+  const targetTime = loopTime / 1000;
+  
+  // Set the time and wait for seek to complete
+  return new Promise<void>((resolve) => {
+    const onSeeked = () => {
+      asset.videoEl!.removeEventListener('seeked', onSeeked);
+      
+      // Draw video frame
+      try {
+        ctx.drawImage(
+          asset.videoEl!,
+          -asset.width / 2,
+          -asset.height / 2,
+          asset.width,
+          asset.height
+        );
+      } catch (error) {
+        console.warn('Error drawing video frame:', error);
+      }
+      
+      resolve();
+    };
+    
+    // If we're already at the right time, draw immediately
+    if (Math.abs(asset.videoEl.currentTime - targetTime) < 0.1) {
+      onSeeked();
+      return;
+    }
+    
+    asset.videoEl.addEventListener('seeked', onSeeked, { once: true });
+    asset.videoEl.currentTime = targetTime;
+    
+    // Fallback timeout to prevent hanging
+    setTimeout(() => {
+      asset.videoEl!.removeEventListener('seeked', onSeeked);
+      resolve();
+    }, 1000);
+  });
+}
+
 function applyTransform(
   ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
   transform: LayerTransform
@@ -131,40 +258,6 @@ function drawGifAsset(
       asset.width,
       asset.height
     );
-  }
-}
-
-function drawVideoAsset(
-  ctx: CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D,
-  asset: Asset & { kind: 'video' },
-  currentTimeMs: number
-): void {
-  if (!asset.videoEl) {
-    return;
-  }
-  
-  // Seek video to current time (modulo duration for looping)
-  const loopTime = currentTimeMs % asset.durationMs;
-  const targetTime = loopTime / 1000;
-  
-  // Only seek if we're significantly off
-  const tolerance = 1 / 30; // ~33ms tolerance
-  if (Math.abs(asset.videoEl.currentTime - targetTime) > tolerance) {
-    asset.videoEl.currentTime = targetTime;
-  }
-  
-  // Draw video frame
-  try {
-    ctx.drawImage(
-      asset.videoEl,
-      -asset.width / 2,
-      -asset.height / 2,
-      asset.width,
-      asset.height
-    );
-  } catch (error) {
-    // Video might not be ready yet
-    console.warn('Error drawing video frame:', error);
   }
 }
 
