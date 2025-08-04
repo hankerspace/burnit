@@ -232,9 +232,9 @@ export function CanvasStage() {
       }
 
       const { transform } = layer;
-      // Use larger handle size for mobile devices
+      // Use larger handle size for mobile devices for better touch interaction
       const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-      const handleSize = isMobile ? 12 : 8;
+      const handleSize = isMobile ? 20 : 8; // Increased from 12 to 20 for better mobile UX
       const halfHandleSize = handleSize / 2;
 
       // Calculate the layer's bounding box

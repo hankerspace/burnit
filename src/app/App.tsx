@@ -23,6 +23,7 @@ function App() {
   const [isRightSidebarOpen, setIsRightSidebarOpen] = React.useState(false);
   const [showMobileUpload, setShowMobileUpload] = React.useState(false);
   const [showCameraCapture, setShowCameraCapture] = React.useState(false);
+  const [showMobileExport, setShowMobileExport] = React.useState(false);
 
   React.useEffect(() => {
     // Create a default project if none exists
@@ -130,7 +131,7 @@ function App() {
           <span className="text-muted">/ {currentProject.name}</span>
         </div>
         <div className="app-actions">
-          <ExportDialog />
+          <ExportDialog isOpen={showMobileExport} onOpenChange={setShowMobileExport} />
         </div>
       </header>
 
@@ -140,9 +141,7 @@ function App() {
         onToggleRightSidebar={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
         onShowAssetUpload={() => setShowMobileUpload(true)}
         onShowCameraCapture={() => setShowCameraCapture(true)}
-        onExport={() => {
-          /* Export functionality will be handled by ExportDialog */
-        }}
+        onExport={() => setShowMobileExport(true)}
         isLeftSidebarOpen={isLeftSidebarOpen}
         isRightSidebarOpen={isRightSidebarOpen}
       />
