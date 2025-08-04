@@ -27,7 +27,7 @@ const LIBRARY_ASSETS: LibraryAssetInfo[] = [
   { filename: 'fireD.gif', category: 'fire', displayName: 'Fire D' },
   { filename: 'smokeA.gif', category: 'smoke', displayName: 'Smoke A' },
   { filename: 'smokeB.gif', category: 'smoke', displayName: 'Smoke B' },
-      { filename: 'smokeC.gif', category: 'smoke', displayName: 'Smoke C' },
+  { filename: 'smokeC.gif', category: 'smoke', displayName: 'Smoke C' },
 ];
 
 class LibraryManager {
@@ -60,7 +60,7 @@ class LibraryManager {
 
           const blob = await response.blob();
           const file = new File([blob], assetInfo.filename, { type: 'image/gif' });
-          
+
           const gifAsset = await decodeGif(file);
           // Override the generated name with our display name
           gifAsset.name = assetInfo.displayName;
@@ -88,8 +88,10 @@ class LibraryManager {
       this.library.isLoading = false;
       this.notifyListeners();
 
-      console.log(`Library loaded with ${this.library.categories.length} categories and ${this.getTotalAssetCount()} assets`);
-      
+      console.log(
+        `Library loaded with ${this.library.categories.length} categories and ${this.getTotalAssetCount()} assets`
+      );
+
       return this.library;
     } catch (error) {
       this.library.isLoading = false;
@@ -103,16 +105,16 @@ class LibraryManager {
   }
 
   getCategoryAssets(categoryId: string): GifAsset[] {
-    const category = this.library.categories.find(cat => cat.id === categoryId);
+    const category = this.library.categories.find((cat) => cat.id === categoryId);
     return category ? [...category.assets] : [];
   }
 
   getAllAssets(): GifAsset[] {
-    return this.library.categories.flatMap(category => category.assets);
+    return this.library.categories.flatMap((category) => category.assets);
   }
 
   getAssetById(assetId: string): GifAsset | undefined {
-    return this.getAllAssets().find(asset => asset.id === assetId);
+    return this.getAllAssets().find((asset) => asset.id === assetId);
   }
 
   subscribe(listener: (library: AssetLibrary) => void): () => void {
@@ -132,7 +134,7 @@ class LibraryManager {
 
   private notifyListeners(): void {
     const librarySnapshot = this.getLibrary();
-    this.listeners.forEach(listener => {
+    this.listeners.forEach((listener) => {
       try {
         listener(librarySnapshot);
       } catch (error) {
@@ -143,8 +145,8 @@ class LibraryManager {
 
   dispose(): void {
     // Clean up all loaded assets
-    this.getAllAssets().forEach(asset => {
-      asset.frames.forEach(frame => {
+    this.getAllAssets().forEach((asset) => {
+      asset.frames.forEach((frame) => {
         if (frame.bitmap) {
           frame.bitmap.close();
         }
@@ -167,7 +169,9 @@ export const libraryManager = new LibraryManager();
 // Convenience functions
 export const loadLibrary = () => libraryManager.loadLibrary();
 export const getLibrary = () => libraryManager.getLibrary();
-export const getCategoryAssets = (categoryId: string) => libraryManager.getCategoryAssets(categoryId);
+export const getCategoryAssets = (categoryId: string) =>
+  libraryManager.getCategoryAssets(categoryId);
 export const getAllLibraryAssets = () => libraryManager.getAllAssets();
 export const getLibraryAssetById = (assetId: string) => libraryManager.getAssetById(assetId);
-export const subscribeToLibrary = (listener: (library: AssetLibrary) => void) => libraryManager.subscribe(listener);
+export const subscribeToLibrary = (listener: (library: AssetLibrary) => void) =>
+  libraryManager.subscribe(listener);

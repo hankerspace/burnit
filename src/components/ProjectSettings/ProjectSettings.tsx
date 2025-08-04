@@ -48,21 +48,21 @@ export function ProjectSettings() {
     if (type === 'transparent') {
       updateProjectSettings({ background: { type: 'transparent' } });
     } else {
-      updateProjectSettings({ 
-        background: { 
-          type: 'color', 
-          color: settings.background.color || '#000000' 
-        } 
+      updateProjectSettings({
+        background: {
+          type: 'color',
+          color: settings.background.color || '#000000',
+        },
       });
     }
   };
 
   const handleBackgroundColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateProjectSettings({ 
-      background: { 
-        type: 'color', 
-        color: e.target.value 
-      } 
+    updateProjectSettings({
+      background: {
+        type: 'color',
+        color: e.target.value,
+      },
     });
   };
 
@@ -85,7 +85,7 @@ export function ProjectSettings() {
         {/* Canvas Size */}
         <section className="settings-section">
           <h4 className="section-title">Canvas Size</h4>
-          
+
           <div className="property-row">
             <div className="property-group">
               <label className="property-label">Width</label>
@@ -98,7 +98,7 @@ export function ProjectSettings() {
                 max="7680"
               />
             </div>
-            
+
             <div className="property-group">
               <label className="property-label">Height</label>
               <input
@@ -135,7 +135,7 @@ export function ProjectSettings() {
         {/* Animation Settings */}
         <section className="settings-section">
           <h4 className="section-title">Animation</h4>
-          
+
           <div className="property-group">
             <label className="property-label">Frame Rate (FPS)</label>
             <input
@@ -169,7 +169,7 @@ export function ProjectSettings() {
         {/* Background */}
         <section className="settings-section">
           <h4 className="section-title">Background</h4>
-          
+
           <div className="property-group">
             <label className="property-label">Type</label>
             <select
@@ -206,17 +206,17 @@ export function ProjectSettings() {
         {/* Project Info */}
         <section className="settings-section">
           <h4 className="section-title">Project Info</h4>
-          
+
           <div className="info-grid">
             <div className="info-item">
               <span className="info-label">Current Size:</span>
-              <span className="info-value">{settings.width} × {settings.height}</span>
+              <span className="info-value">
+                {settings.width} × {settings.height}
+              </span>
             </div>
             <div className="info-item">
               <span className="info-label">Aspect Ratio:</span>
-              <span className="info-value">
-                {(settings.width / settings.height).toFixed(2)}:1
-              </span>
+              <span className="info-value">{(settings.width / settings.height).toFixed(2)}:1</span>
             </div>
             <div className="info-item">
               <span className="info-label">Frame Rate:</span>
@@ -225,10 +225,7 @@ export function ProjectSettings() {
             <div className="info-item">
               <span className="info-label">Loop Duration:</span>
               <span className="info-value">
-                {settings.loopDurationMs === 'auto' 
-                  ? 'Auto' 
-                  : `${settings.loopDurationMs}ms`
-                }
+                {settings.loopDurationMs === 'auto' ? 'Auto' : `${settings.loopDurationMs}ms`}
               </span>
             </div>
           </div>

@@ -2,12 +2,12 @@ import { describe, it, expect } from 'vitest';
 import { generateId, isValidUUID } from '../utils/id';
 import { clamp, lerp, degToRad, radToDeg } from '../utils/math';
 import { formatTime, parseTime, timeToFrame, frameToTime } from '../utils/time';
-import { 
-  getFileExtension, 
-  isImageFile, 
-  isGifFile, 
-  isVideoFile, 
-  formatFileSize 
+import {
+  getFileExtension,
+  isImageFile,
+  isGifFile,
+  isVideoFile,
+  formatFileSize,
 } from '../utils/file';
 
 describe('Utility Functions', () => {
@@ -94,7 +94,7 @@ describe('Utility Functions', () => {
       const pngFile = new File([''], 'test.png', { type: 'image/png' });
       const jpegFile = new File([''], 'test.jpg', { type: 'image/jpeg' });
       const textFile = new File([''], 'test.txt', { type: 'text/plain' });
-      
+
       expect(isImageFile(pngFile)).toBe(true);
       expect(isImageFile(jpegFile)).toBe(true);
       expect(isImageFile(textFile)).toBe(false);
@@ -103,7 +103,7 @@ describe('Utility Functions', () => {
     it('should identify GIF files', () => {
       const gifFile = new File([''], 'test.gif', { type: 'image/gif' });
       const pngFile = new File([''], 'test.png', { type: 'image/png' });
-      
+
       expect(isGifFile(gifFile)).toBe(true);
       expect(isGifFile(pngFile)).toBe(false);
     });
@@ -111,7 +111,7 @@ describe('Utility Functions', () => {
     it('should identify video files', () => {
       const webmFile = new File([''], 'test.webm', { type: 'video/webm' });
       const pngFile = new File([''], 'test.png', { type: 'image/png' });
-      
+
       expect(isVideoFile(webmFile)).toBe(true);
       expect(isVideoFile(pngFile)).toBe(false);
     });

@@ -38,7 +38,7 @@ export function TabbedSidebar() {
           <span className="tab-label">Settings</span>
         </button>
       </div>
-      
+
       <div className="sidebar-content">
         {activeTab === 'assets' && (
           <div className="tab-panel">

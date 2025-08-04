@@ -14,27 +14,27 @@ export function renderProjectToCanvas(
   // Create canvas if not provided
   const targetCanvas = canvas || document.createElement('canvas');
   const ctx = targetCanvas.getContext('2d');
-  
+
   if (!ctx) {
     throw new Error('Failed to get canvas context');
   }
 
   const { settings, layers, assets } = project;
-  
+
   // Set canvas dimensions to match project settings
   targetCanvas.width = settings.width;
   targetCanvas.height = settings.height;
-  
+
   // Create draw context
   const drawContext = {
     ctx,
     width: settings.width,
-    height: settings.height
+    height: settings.height,
   };
-  
+
   // Clear canvas with background
   clearCanvas(drawContext, settings.background);
-  
+
   // Draw layers in order
   for (const layer of layers) {
     const asset = assets[layer.assetId];
@@ -42,21 +42,18 @@ export function renderProjectToCanvas(
       drawLayer(drawContext, layer, asset, currentTime);
     }
   }
-  
+
   return targetCanvas;
 }
 
 /**
  * Exports a project as PNG
  */
-export function exportProjectAsPNG(
-  project: Project,
-  currentTime: number = 0
-): Promise<Blob> {
+export function exportProjectAsPNG(project: Project, currentTime: number = 0): Promise<Blob> {
   return new Promise((resolve, reject) => {
     try {
       const canvas = renderProjectToCanvas(project, currentTime);
-      
+
       canvas.toBlob((blob) => {
         if (blob) {
           resolve(blob);
@@ -81,14 +78,18 @@ export function exportProjectAsJPEG(
   return new Promise((resolve, reject) => {
     try {
       const canvas = renderProjectToCanvas(project, currentTime);
-      
-      canvas.toBlob((blob) => {
-        if (blob) {
-          resolve(blob);
-        } else {
-          reject(new Error('Failed to create JPEG blob'));
-        }
-      }, 'image/jpeg', quality);
+
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            resolve(blob);
+          } else {
+            reject(new Error('Failed to create JPEG blob'));
+          }
+        },
+        'image/jpeg',
+        quality
+      );
     } catch (error) {
       reject(error);
     }
@@ -104,16 +105,16 @@ export async function exportProjectAsGIF(
   loopDurationMs: number = 3000
 ): Promise<Blob> {
   const { settings, layers, assets } = project;
-  
+
   const options = {
     width: settings.width,
     height: settings.height,
     fps: settings.fps,
     quality,
     loopDurationMs,
-    background: settings.background
+    background: settings.background,
   };
-  
+
   const blob = await exportGif(layers, assets, options);
   return blob;
 }
@@ -127,32 +128,32 @@ export async function exportProjectAsWebM(
   loopDurationMs: number = 3000
 ): Promise<Blob> {
   const { settings } = project;
-  
+
   // Create a canvas and render the project animation
   const canvas = document.createElement('canvas');
   canvas.width = settings.width;
   canvas.height = settings.height;
-  
+
   const ctx = canvas.getContext('2d');
   if (!ctx) {
     throw new Error('Failed to get canvas context');
   }
-  
+
   const drawContext = {
     ctx,
     width: settings.width,
-    height: settings.height
+    height: settings.height,
   };
-  
+
   // Start animation loop for WebM recording
   const frameCount = Math.ceil((loopDurationMs / 1000) * settings.fps);
   let currentFrame = 0;
-  
+
   // Wait for animation to complete
   await new Promise<void>((resolve) => {
     const animate = () => {
       const currentTime = (currentFrame / frameCount) * loopDurationMs;
-      
+
       // Clear and draw frame
       clearCanvas(drawContext, settings.background);
       for (const layer of project.layers) {
@@ -161,7 +162,7 @@ export async function exportProjectAsWebM(
           drawLayer(drawContext, layer, asset, currentTime);
         }
       }
-      
+
       currentFrame++;
       if (currentFrame < frameCount) {
         requestAnimationFrame(animate);
@@ -169,20 +170,20 @@ export async function exportProjectAsWebM(
         resolve();
       }
     };
-    
+
     // Start animation
     animate();
   });
-  
+
   const options = {
     width: settings.width,
     height: settings.height,
     fps: settings.fps,
     videoBitsPerSecond,
     loopDurationMs,
-    background: settings.background
+    background: settings.background,
   };
-  
+
   const blob = await exportWebM(canvas, options);
   return blob;
 }
@@ -212,6 +213,6 @@ export function generateExportFilename(
   const date = timestamp || new Date();
   const dateStr = date.toISOString().slice(0, 19).replace(/[:.]/g, '-');
   const sanitizedName = projectName.replace(/[^a-zA-Z0-9-_]/g, '_');
-  
+
   return `${sanitizedName}_${dateStr}.${format}`;
 }

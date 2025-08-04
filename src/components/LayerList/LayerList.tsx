@@ -35,7 +35,7 @@ export function LayerList() {
         <h3>Layers</h3>
         <span className="text-muted text-sm">({layers.length})</span>
       </div>
-      
+
       <div className="panel-content">
         {layers.length === 0 ? (
           <div className="empty-state">
@@ -92,47 +92,68 @@ function LayerItem({
   onRemove,
   onDuplicate,
   onMoveUp,
-  onMoveDown
+  onMoveDown,
 }: LayerItemProps) {
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    if (e.metaKey || e.ctrlKey) {
-      onToggleSelect(layer.id);
-    } else {
-      onSelect(layer.id);
-    }
-  }, [layer.id, onSelect, onToggleSelect]);
+  const handleClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (e.metaKey || e.ctrlKey) {
+        onToggleSelect(layer.id);
+      } else {
+        onSelect(layer.id);
+      }
+    },
+    [layer.id, onSelect, onToggleSelect]
+  );
 
-  const handleVisibilityToggle = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onUpdate(layer.id, { visible: !layer.visible });
-  }, [layer.id, layer.visible, onUpdate]);
+  const handleVisibilityToggle = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onUpdate(layer.id, { visible: !layer.visible });
+    },
+    [layer.id, layer.visible, onUpdate]
+  );
 
-  const handleLockToggle = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onUpdate(layer.id, { locked: !layer.locked });
-  }, [layer.id, layer.locked, onUpdate]);
+  const handleLockToggle = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onUpdate(layer.id, { locked: !layer.locked });
+    },
+    [layer.id, layer.locked, onUpdate]
+  );
 
-  const handleRemove = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (confirm(`Remove layer "${layer.name}"?`)) {
-      onRemove(layer.id);
-    }
-  }, [layer.id, layer.name, onRemove]);
+  const handleRemove = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (confirm(`Remove layer "${layer.name}"?`)) {
+        onRemove(layer.id);
+      }
+    },
+    [layer.id, layer.name, onRemove]
+  );
 
-  const handleDuplicate = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onDuplicate(layer.id);
-  }, [layer.id, onDuplicate]);
+  const handleDuplicate = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onDuplicate(layer.id);
+    },
+    [layer.id, onDuplicate]
+  );
 
-  const handleMoveUp = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onMoveUp(layer.id);
-  }, [layer.id, onMoveUp]);
+  const handleMoveUp = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onMoveUp(layer.id);
+    },
+    [layer.id, onMoveUp]
+  );
 
-  const handleMoveDown = useCallback((e: React.MouseEvent) => {
-    e.stopPropagation();
-    onMoveDown(layer.id);
-  }, [layer.id, onMoveDown]);
+  const handleMoveDown = useCallback(
+    (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onMoveDown(layer.id);
+    },
+    [layer.id, onMoveDown]
+  );
 
   const renderThumbnail = () => {
     if (!asset) {
@@ -141,14 +162,7 @@ function LayerItem({
 
     switch (asset.kind) {
       case 'image':
-        return (
-          <img
-            src={asset.src}
-            alt={asset.name}
-            className="layer-thumbnail"
-            loading="lazy"
-          />
-        );
+        return <img src={asset.src} alt={asset.name} className="layer-thumbnail" loading="lazy" />;
       case 'gif':
         return (
           <div className="layer-thumbnail gif-thumbnail">
@@ -171,10 +185,8 @@ function LayerItem({
       className={`layer-item ${isSelected ? 'selected' : ''} ${!layer.visible ? 'hidden' : ''} ${layer.locked ? 'locked' : ''}`}
       onClick={handleClick}
     >
-      <div className="layer-thumbnail-container">
-        {renderThumbnail()}
-      </div>
-      
+      <div className="layer-thumbnail-container">{renderThumbnail()}</div>
+
       <div className="layer-info">
         <div className="layer-name" title={layer.name}>
           {layer.name}
@@ -188,7 +200,7 @@ function LayerItem({
           </div>
         )}
       </div>
-      
+
       <div className="layer-controls">
         <button
           className={`layer-control ${layer.visible ? 'active' : ''}`}
@@ -197,7 +209,7 @@ function LayerItem({
         >
           {layer.visible ? '👁' : '🙈'}
         </button>
-        
+
         <button
           className={`layer-control ${layer.locked ? 'active' : ''}`}
           onClick={handleLockToggle}
@@ -206,7 +218,7 @@ function LayerItem({
           {layer.locked ? '🔒' : '🔓'}
         </button>
       </div>
-      
+
       <div className="layer-actions">
         <button
           className="layer-action btn btn-small btn-icon"
@@ -215,7 +227,7 @@ function LayerItem({
         >
           ⬆️
         </button>
-        
+
         <button
           className="layer-action btn btn-small btn-icon"
           onClick={handleMoveDown}
@@ -223,7 +235,7 @@ function LayerItem({
         >
           ⬇️
         </button>
-        
+
         <button
           className="layer-action btn btn-small btn-icon"
           onClick={handleDuplicate}
@@ -231,7 +243,7 @@ function LayerItem({
         >
           📋
         </button>
-        
+
         <button
           className="layer-action btn btn-small btn-icon"
           onClick={handleRemove}

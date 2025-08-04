@@ -18,31 +18,31 @@ export async function exportGif(
   options: GifExportOptions
 ): Promise<Blob> {
   const { width, height, fps, loopDurationMs } = options;
-  
+
   // Create GIF encoder
   const gif = GIFEncoder();
-  
+
   // Calculate frame count and frame duration
   const frameCount = Math.ceil((loopDurationMs / 1000) * fps);
   const frameDuration = Math.round(1000 / fps); // milliseconds per frame
-  
+
   // Create offscreen canvas for rendering
   const canvas = new OffscreenCanvas(width, height);
   const ctx = canvas.getContext('2d');
-  
+
   if (!ctx) {
     throw new Error('Could not get 2D context from OffscreenCanvas');
   }
-  
+
   const drawContext = { ctx, width, height };
-  
+
   // Generate frames
   for (let frame = 0; frame < frameCount; frame++) {
     const currentTime = (frame / frameCount) * loopDurationMs;
-    
+
     // Clear canvas with background
     clearCanvas(drawContext, options.background);
-    
+
     // Draw all layers at current time
     for (const layer of layers) {
       const asset = assets[layer.assetId];
@@ -50,27 +50,27 @@ export async function exportGif(
         drawLayer(drawContext, layer, asset, currentTime);
       }
     }
-    
+
     // Get image data from canvas
     const imageData = ctx.getImageData(0, 0, width, height);
-    
+
     // Quantize colors to create palette
     const palette = quantize(imageData.data, 256);
-    
+
     // Apply palette to create indexed image
     const index = applyPalette(imageData.data, palette);
-    
+
     // Add frame to GIF
     gif.writeFrame(index, width, height, {
       palette,
       delay: frameDuration, // GIF delay is in centiseconds
-      transparent: options.background.type === 'transparent'
+      transparent: options.background.type === 'transparent',
     });
   }
-  
+
   // Finish encoding
   gif.finish();
-  
+
   // Return as blob
   const buffer = gif.bytes();
   return new Blob([buffer], { type: 'image/gif' });
@@ -118,7 +118,7 @@ export function createGifWorker(): Worker {
       }
     };
   `;
-  
+
   const blob = new Blob([workerCode], { type: 'application/javascript' });
   return new Worker(URL.createObjectURL(blob));
 }
