@@ -131,15 +131,15 @@ function App() {
           <span className="text-muted">/ {currentProject.name}</span>
         </div>
         <div className="app-actions">
-          <ExportDialog 
-            isOpen={showMobileExport} 
+          <ExportDialog
+            isOpen={showMobileExport}
             onOpenChange={(open) => {
               setShowMobileExport(open);
               // Also reset the mobile export state when dialog closes
               if (!open) {
                 setShowMobileExport(false);
               }
-            }} 
+            }}
           />
         </div>
       </header>

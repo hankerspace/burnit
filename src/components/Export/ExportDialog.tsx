@@ -17,16 +17,19 @@ interface ExportDialogProps {
 
 export function ExportDialog({ isOpen: externalIsOpen, onOpenChange }: ExportDialogProps = {}) {
   const [internalIsOpen, setInternalIsOpen] = useState(false);
-  
+
   // Use external control if provided, otherwise use internal state
   const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
-  const setIsOpen = (open: boolean) => {
-    if (onOpenChange) {
-      onOpenChange(open);
-    } else {
-      setInternalIsOpen(open);
-    }
-  };
+  const setIsOpen = useCallback(
+    (open: boolean) => {
+      if (onOpenChange) {
+        onOpenChange(open);
+      } else {
+        setInternalIsOpen(open);
+      }
+    },
+    [onOpenChange]
+  );
   const [exportFormat, setExportFormat] = useState<'png' | 'jpeg' | 'gif' | 'webm'>('gif');
   const [isExporting, setIsExporting] = useState(false);
 
@@ -87,7 +90,7 @@ export function ExportDialog({ isOpen: externalIsOpen, onOpenChange }: ExportDia
       setIsExporting(false);
       setIsOpen(false);
     }
-  }, [currentProject, exportFormat, timeline.currentTime, getActualDuration]);
+  }, [currentProject, exportFormat, timeline.currentTime, getActualDuration, setIsOpen]);
 
   return (
     <>
