@@ -145,7 +145,7 @@ npm run test:e2e:ui  # Run E2E tests with UI
 
 ### Technology Stack
 
-- **Frontend**: React 19 + TypeScript
+- **Frontend**: React 19 + TypeScript (with strict type safety)
 - **Build Tool**: Vite 7
 - **State Management**: Zustand
 - **UI Components**: Radix UI primitives
@@ -155,6 +155,7 @@ npm run test:e2e:ui  # Run E2E tests with UI
 - **Video**: MediaRecorder API + HTMLVideoElement
 - **Testing**: Vitest + Playwright
 - **Linting**: ESLint + Prettier
+- **Code Quality**: Strict TypeScript configuration with enhanced type safety
 
 ## 🎯 Browser Support
 
@@ -258,15 +259,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Large GIF files may cause memory pressure
 - Some mobile browsers have Canvas size limitations
 
-## 🔮 Roadmap
-
-- [ ] Keyframe animation system
-- [ ] Audio track support
-- [ ] Advanced blend modes
-- [ ] Plugin architecture
-- [ ] Cloud save/share
-- [ ] Collaborative editing
-
 ---
 
-Made with 🔥 by the Burn It team
+Made with 🔥 by Hankerspace
