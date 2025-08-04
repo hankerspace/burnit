@@ -131,7 +131,16 @@ function App() {
           <span className="text-muted">/ {currentProject.name}</span>
         </div>
         <div className="app-actions">
-          <ExportDialog isOpen={showMobileExport} onOpenChange={setShowMobileExport} />
+          <ExportDialog 
+            isOpen={showMobileExport} 
+            onOpenChange={(open) => {
+              setShowMobileExport(open);
+              // Also reset the mobile export state when dialog closes
+              if (!open) {
+                setShowMobileExport(false);
+              }
+            }} 
+          />
         </div>
       </header>
 
@@ -141,7 +150,10 @@ function App() {
         onToggleRightSidebar={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
         onShowAssetUpload={() => setShowMobileUpload(true)}
         onShowCameraCapture={() => setShowCameraCapture(true)}
-        onExport={() => setShowMobileExport(true)}
+        onExport={() => {
+          console.log('Mobile export button clicked');
+          setShowMobileExport(true);
+        }}
         isLeftSidebarOpen={isLeftSidebarOpen}
         isRightSidebarOpen={isRightSidebarOpen}
       />
