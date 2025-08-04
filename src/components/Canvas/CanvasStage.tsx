@@ -289,6 +289,14 @@ export function CanvasStage() {
     [currentProject]
   );
 
+  // Helper function to add haptic feedback on mobile
+  const addHapticFeedback = useCallback(() => {
+    // Add haptic feedback for mobile devices if available
+    if ('vibrate' in navigator && navigator.vibrate) {
+      navigator.vibrate(50); // Short vibration for feedback
+    }
+  }, []);
+
   // Helper function to get coordinates from mouse or touch event
   const getEventCoordinates = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     if ('touches' in e) {
@@ -367,6 +375,9 @@ export function CanvasStage() {
       // Prevent default touch behavior to avoid scrolling
       e.preventDefault();
 
+      // Prevent page scrolling during canvas interaction
+      document.body.style.overflow = 'hidden';
+
       const { clientX, clientY } = getEventCoordinates(e);
       const { x, y } = screenToCanvas(clientX, clientY);
 
@@ -416,6 +427,8 @@ export function CanvasStage() {
         // Select the layer if not already selected
         if (!canvasState.selectedLayerIds.includes(selectedLayerId)) {
           useAppStore.getState().selectLayer(selectedLayerId);
+          // Add haptic feedback when selecting a layer on mobile
+          addHapticFeedback();
         }
 
         // Start dragging
@@ -441,7 +454,7 @@ export function CanvasStage() {
         useAppStore.getState().deselectLayers();
       }
     },
-    [currentProject, isPointInLayer, getResizeHandle, canvasState.selectedLayerIds, screenToCanvas, getEventCoordinates]
+    [currentProject, isPointInLayer, getResizeHandle, canvasState.selectedLayerIds, screenToCanvas, getEventCoordinates, addHapticFeedback]
   );
 
   // Handle pointer move - drag or resize selected layer (works for both mouse and touch)
@@ -554,6 +567,9 @@ export function CanvasStage() {
 
   // Handle pointer up - end drag or resize (works for both mouse and touch)
   const handlePointerUp = useCallback(() => {
+    // Restore page scrolling
+    document.body.style.overflow = '';
+    
     dragStateRef.current = {
       isDragging: false,
       isResizing: false,
@@ -649,6 +665,10 @@ export function CanvasStage() {
                         : 'grab'
                 : 'grab',
           }}
+          // Accessibility
+          role="img"
+          aria-label={`Canvas: ${currentProject.name} with ${currentProject.layers.length} layers`}
+          tabIndex={0}
           // Mouse events
           onMouseDown={handlePointerDown}
           onMouseMove={handlePointerMove}
