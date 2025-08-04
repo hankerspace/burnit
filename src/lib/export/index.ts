@@ -51,8 +51,7 @@ export function renderProjectToCanvas(
  */
 export function exportProjectAsPNG(
   project: Project,
-  currentTime: number = 0,
-  quality: number = 1.0
+  currentTime: number = 0
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
     try {

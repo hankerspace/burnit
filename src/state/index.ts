@@ -100,7 +100,7 @@ const DEFAULT_COMPOSITION_SETTINGS: CompositionSettings = {
 
 const DEFAULT_TIMELINE_STATE: TimelineState = {
   currentTime: 0,
-  isPlaying: true,
+  isPlaying: false,
   speed: 1,
   loopStartTime: 0
 };

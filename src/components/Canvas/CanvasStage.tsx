@@ -521,10 +521,6 @@ export function CanvasStage() {
     };
   }, []);
 
-  // Handle canvas click (for compatibility)
-  const handleCanvasClick = useCallback((e: React.MouseEvent) => {
-    // Click is handled by mouseDown, but we keep this for any future click-specific logic
-  }, []);
 
   // Drag & Drop event handlers
   const handleDragEnter = useCallback((e: React.DragEvent) => {
