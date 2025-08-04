@@ -1,4 +1,4 @@
-// @ts-ignore - gifenc doesn't have TypeScript definitions
+// @ts-expect-error - gifenc doesn't have TypeScript definitions
 import { GIFEncoder, quantize, applyPalette } from 'gifenc';
 import type { Asset, Layer, CompositionSettings } from '../../types';
 import { clearCanvas, drawLayer } from '../canvas/draw';
@@ -63,7 +63,7 @@ export async function exportGif(
     // Add frame to GIF
     gif.writeFrame(index, width, height, {
       palette,
-      delay: frameDuration / 10, // GIF delay is in centiseconds
+      delay: frameDuration, // GIF delay is in centiseconds
       transparent: options.background.type === 'transparent'
     });
   }
