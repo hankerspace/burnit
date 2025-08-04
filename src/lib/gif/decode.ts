@@ -90,7 +90,7 @@ export async function decodeGif(file: File): Promise<GifAsset> {
     src: createBlobUrl(file),
     frames: gifFrames,
     totalDurationMs,
-    loopCount: (gif as any).gce?.loopCount || 'infinite'
+    loopCount: (gif as { gce?: { loopCount?: number } }).gce?.loopCount || 'infinite'
   };
 }
 

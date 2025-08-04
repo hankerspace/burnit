@@ -98,100 +98,93 @@ export function exportProjectAsJPEG(
 /**
  * Exports a project as GIF
  */
-export function exportProjectAsGIF(
+export async function exportProjectAsGIF(
   project: Project,
   quality: number = 80,
   loopDurationMs: number = 3000
 ): Promise<Blob> {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const { settings, layers, assets } = project;
-      
-      const options = {
-        width: settings.width,
-        height: settings.height,
-        fps: settings.fps,
-        quality,
-        loopDurationMs,
-        background: settings.background
-      };
-      
-      const blob = await exportGif(layers, assets, options);
-      resolve(blob);
-    } catch (error) {
-      reject(error);
-    }
-  });
+  const { settings, layers, assets } = project;
+  
+  const options = {
+    width: settings.width,
+    height: settings.height,
+    fps: settings.fps,
+    quality,
+    loopDurationMs,
+    background: settings.background
+  };
+  
+  const blob = await exportGif(layers, assets, options);
+  return blob;
 }
 
 /**
  * Exports a project as WebM
  */
-export function exportProjectAsWebM(
+export async function exportProjectAsWebM(
   project: Project,
   videoBitsPerSecond: number = 2500000,
   loopDurationMs: number = 3000
 ): Promise<Blob> {
-  return new Promise(async (resolve, reject) => {
-    try {
-      const { settings } = project;
+  const { settings } = project;
+  
+  // Create a canvas and render the project animation
+  const canvas = document.createElement('canvas');
+  canvas.width = settings.width;
+  canvas.height = settings.height;
+  
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    throw new Error('Failed to get canvas context');
+  }
+  
+  const drawContext = {
+    ctx,
+    width: settings.width,
+    height: settings.height
+  };
+  
+  // Start animation loop for WebM recording
+  const frameCount = Math.ceil((loopDurationMs / 1000) * settings.fps);
+  let currentFrame = 0;
+  
+  // Wait for animation to complete
+  await new Promise<void>((resolve) => {
+    const animate = () => {
+      const currentTime = (currentFrame / frameCount) * loopDurationMs;
       
-      // Create a canvas and render the project animation
-      const canvas = document.createElement('canvas');
-      canvas.width = settings.width;
-      canvas.height = settings.height;
-      
-      const ctx = canvas.getContext('2d');
-      if (!ctx) {
-        throw new Error('Failed to get canvas context');
+      // Clear and draw frame
+      clearCanvas(drawContext, settings.background);
+      for (const layer of project.layers) {
+        const asset = project.assets[layer.assetId];
+        if (asset && layer.visible) {
+          drawLayer(drawContext, layer, asset, currentTime);
+        }
       }
       
-      const drawContext = {
-        ctx,
-        width: settings.width,
-        height: settings.height
-      };
-      
-      // Start animation loop for WebM recording
-      const frameCount = Math.ceil((loopDurationMs / 1000) * settings.fps);
-      let currentFrame = 0;
-      
-      const animate = () => {
-        const currentTime = (currentFrame / frameCount) * loopDurationMs;
-        
-        // Clear and draw frame
-        clearCanvas(drawContext, settings.background);
-        for (const layer of project.layers) {
-          const asset = project.assets[layer.assetId];
-          if (asset && layer.visible) {
-            drawLayer(drawContext, layer, asset, currentTime);
-          }
-        }
-        
-        currentFrame++;
-        if (currentFrame < frameCount) {
-          requestAnimationFrame(animate);
-        }
-      };
-      
-      // Start animation
-      animate();
-      
-      const options = {
-        width: settings.width,
-        height: settings.height,
-        fps: settings.fps,
-        videoBitsPerSecond,
-        loopDurationMs,
-        background: settings.background
-      };
-      
-      const blob = await exportWebM(canvas, options);
-      resolve(blob);
-    } catch (error) {
-      reject(error);
-    }
+      currentFrame++;
+      if (currentFrame < frameCount) {
+        requestAnimationFrame(animate);
+      } else {
+        resolve();
+      }
+    };
+    
+    // Start animation
+    animate();
   });
+  
+  const options = {
+    width: settings.width,
+    height: settings.height,
+    fps: settings.fps,
+    videoBitsPerSecond,
+    loopDurationMs,
+    background: settings.background
+  };
+  
+  const blob = await exportWebM(canvas, options);
+  return blob;
 }
 
 /**

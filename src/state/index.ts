@@ -192,7 +192,9 @@ export const useAppStore = create<AppState>()(
       const { currentProject } = get();
       if (!currentProject) return;
 
-      const { [assetId]: removed, ...remainingAssets } = currentProject.assets;
+      const remainingAssets = Object.fromEntries(
+        Object.entries(currentProject.assets).filter(([id]) => id !== assetId)
+      );
       const remainingLayers = currentProject.layers.filter(layer => layer.assetId !== assetId);
 
       set({

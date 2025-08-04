@@ -14,19 +14,19 @@ export function getFileExtension(filename: string): string {
 }
 
 export function isImageFile(file: File): boolean {
-  return SUPPORTED_IMAGE_TYPES.includes(file.type as any);
+  return SUPPORTED_IMAGE_TYPES.includes(file.type as typeof SUPPORTED_IMAGE_TYPES[number]);
 }
 
 export function isGifFile(file: File): boolean {
-  return SUPPORTED_GIF_TYPES.includes(file.type as any);
+  return SUPPORTED_GIF_TYPES.includes(file.type as typeof SUPPORTED_GIF_TYPES[number]);
 }
 
 export function isVideoFile(file: File): boolean {
-  return SUPPORTED_VIDEO_TYPES.includes(file.type as any);
+  return SUPPORTED_VIDEO_TYPES.includes(file.type as typeof SUPPORTED_VIDEO_TYPES[number]);
 }
 
 export function isSupportedFile(file: File): boolean {
-  return ALL_SUPPORTED_TYPES.includes(file.type as any);
+  return ALL_SUPPORTED_TYPES.includes(file.type as typeof ALL_SUPPORTED_TYPES[number]);
 }
 
 export function createBlobUrl(file: File): string {

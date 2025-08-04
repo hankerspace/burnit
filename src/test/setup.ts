@@ -42,7 +42,7 @@ const mockContext = {
   setLineDash: vi.fn(),
 };
 
-global.HTMLCanvasElement.prototype.getContext = vi.fn(() => mockContext) as any;
+global.HTMLCanvasElement.prototype.getContext = vi.fn(() => mockContext) as typeof HTMLCanvasElement.prototype.getContext;
 
 // Mock OffscreenCanvas if not available
 if (typeof OffscreenCanvas === 'undefined') {
@@ -58,5 +58,5 @@ if (typeof OffscreenCanvas === 'undefined') {
     getContext() {
       return mockContext;
     }
-  } as any;
+  } as typeof OffscreenCanvas;
 }

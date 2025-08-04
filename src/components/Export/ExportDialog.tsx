@@ -65,7 +65,7 @@ export function ExportDialog() {
       setIsExporting(false);
       setIsOpen(false);
     }
-  }, [currentProject, exportFormat, timeline.currentTime]);
+  }, [currentProject, exportFormat, timeline.currentTime, getActualDuration]);
 
   if (!isOpen) {
     return (
