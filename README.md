@@ -40,7 +40,7 @@ A powerful, client-side web application for composing images, animated GIFs, and
 ## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18.x or higher
+- Node.js 20.x or higher
 - Modern web browser with Canvas 2D support
 
 ### Installation
