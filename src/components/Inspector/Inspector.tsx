@@ -20,7 +20,7 @@ export function Inspector() {
     );
   }
 
-  const selectedLayers = currentProject.layers.filter(layer =>
+  const selectedLayers = currentProject.layers.filter((layer) =>
     selectedLayerIds.includes(layer.id)
   );
 
@@ -50,13 +50,13 @@ export function Inspector() {
           <span className="text-muted text-sm">({selectedLayers.length} selected)</span>
         )}
       </div>
-      
+
       <div className="panel-content">
         <div className="inspector-sections">
           {/* Layer Info */}
           <section className="inspector-section">
             <h4 className="section-title">Layer</h4>
-            
+
             <div className="property-group">
               <label className="property-label">Name</label>
               <input
@@ -66,7 +66,7 @@ export function Inspector() {
                 onChange={(e) => updateLayer(layer.id, { name: e.target.value })}
               />
             </div>
-            
+
             <div className="property-row">
               <div className="property-group">
                 <label className="property-label">
@@ -78,7 +78,7 @@ export function Inspector() {
                   Visible
                 </label>
               </div>
-              
+
               <div className="property-group">
                 <label className="property-label">
                   <input
@@ -95,7 +95,7 @@ export function Inspector() {
           {/* Transform */}
           <section className="inspector-section">
             <h4 className="section-title">Transform</h4>
-            
+
             <div className="property-row">
               <div className="property-group">
                 <label className="property-label">X</label>
@@ -103,21 +103,25 @@ export function Inspector() {
                   type="number"
                   className="input"
                   value={Math.round(layer.transform.x)}
-                  onChange={(e) => updateLayerTransform(layer.id, { x: parseFloat(e.target.value) || 0 })}
+                  onChange={(e) =>
+                    updateLayerTransform(layer.id, { x: parseFloat(e.target.value) || 0 })
+                  }
                 />
               </div>
-              
+
               <div className="property-group">
                 <label className="property-label">Y</label>
                 <input
                   type="number"
                   className="input"
                   value={Math.round(layer.transform.y)}
-                  onChange={(e) => updateLayerTransform(layer.id, { y: parseFloat(e.target.value) || 0 })}
+                  onChange={(e) =>
+                    updateLayerTransform(layer.id, { y: parseFloat(e.target.value) || 0 })
+                  }
                 />
               </div>
             </div>
-            
+
             <div className="property-row">
               <div className="property-group">
                 <label className="property-label">Scale X</label>
@@ -128,10 +132,12 @@ export function Inspector() {
                   max="10"
                   className="input"
                   value={layer.transform.scaleX.toFixed(2)}
-                  onChange={(e) => updateLayerTransform(layer.id, { scaleX: parseFloat(e.target.value) || 1 })}
+                  onChange={(e) =>
+                    updateLayerTransform(layer.id, { scaleX: parseFloat(e.target.value) || 1 })
+                  }
                 />
               </div>
-              
+
               <div className="property-group">
                 <label className="property-label">Scale Y</label>
                 <input
@@ -141,11 +147,13 @@ export function Inspector() {
                   max="10"
                   className="input"
                   value={layer.transform.scaleY.toFixed(2)}
-                  onChange={(e) => updateLayerTransform(layer.id, { scaleY: parseFloat(e.target.value) || 1 })}
+                  onChange={(e) =>
+                    updateLayerTransform(layer.id, { scaleY: parseFloat(e.target.value) || 1 })
+                  }
                 />
               </div>
             </div>
-            
+
             <div className="property-group">
               <label className="property-label">Rotation (degrees)</label>
               <input
@@ -155,10 +163,12 @@ export function Inspector() {
                 max="360"
                 className="input"
                 value={Math.round(layer.transform.rotationDeg)}
-                onChange={(e) => updateLayerTransform(layer.id, { rotationDeg: parseFloat(e.target.value) || 0 })}
+                onChange={(e) =>
+                  updateLayerTransform(layer.id, { rotationDeg: parseFloat(e.target.value) || 0 })
+                }
               />
             </div>
-            
+
             <div className="property-group">
               <label className="property-label">Opacity</label>
               <div className="opacity-controls">
@@ -168,12 +178,12 @@ export function Inspector() {
                   max="1"
                   step="0.01"
                   value={layer.transform.opacity}
-                  onChange={(e) => updateLayerTransform(layer.id, { opacity: parseFloat(e.target.value) })}
+                  onChange={(e) =>
+                    updateLayerTransform(layer.id, { opacity: parseFloat(e.target.value) })
+                  }
                   className="opacity-slider"
                 />
-                <span className="opacity-value">
-                  {Math.round(layer.transform.opacity * 100)}%
-                </span>
+                <span className="opacity-value">{Math.round(layer.transform.opacity * 100)}%</span>
               </div>
             </div>
           </section>
@@ -182,7 +192,7 @@ export function Inspector() {
           {asset && (
             <section className="inspector-section">
               <h4 className="section-title">Asset Info</h4>
-              
+
               <div className="asset-preview">
                 {asset.kind === 'image' && (
                   <img src={asset.src} alt={asset.name} className="asset-preview-image" />
@@ -194,32 +204,36 @@ export function Inspector() {
                   <video src={asset.src} className="asset-preview-video" muted loop />
                 )}
               </div>
-              
+
               <div className="asset-details">
                 <div className="detail-row">
                   <span className="detail-label">Type:</span>
                   <span className="detail-value">{asset.kind.toUpperCase()}</span>
                 </div>
-                
+
                 <div className="detail-row">
                   <span className="detail-label">Size:</span>
-                  <span className="detail-value">{asset.width} × {asset.height}</span>
+                  <span className="detail-value">
+                    {asset.width} × {asset.height}
+                  </span>
                 </div>
-                
+
                 {asset.kind === 'gif' && (
                   <>
                     <div className="detail-row">
                       <span className="detail-label">Frames:</span>
                       <span className="detail-value">{asset.frames.length}</span>
                     </div>
-                    
+
                     <div className="detail-row">
                       <span className="detail-label">Duration:</span>
-                      <span className="detail-value">{(asset.totalDurationMs / 1000).toFixed(1)}s</span>
+                      <span className="detail-value">
+                        {(asset.totalDurationMs / 1000).toFixed(1)}s
+                      </span>
                     </div>
                   </>
                 )}
-                
+
                 {asset.kind === 'video' && (
                   <div className="detail-row">
                     <span className="detail-label">Duration:</span>

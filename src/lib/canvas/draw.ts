@@ -7,12 +7,15 @@ export interface DrawContext {
   height: number;
 }
 
-export function clearCanvas(drawContext: DrawContext, background: CompositionSettings['background']): void {
+export function clearCanvas(
+  drawContext: DrawContext,
+  background: CompositionSettings['background']
+): void {
   const { ctx, width, height } = drawContext;
-  
+
   // Clear the canvas
   ctx.clearRect(0, 0, width, height);
-  
+
   // Draw background if specified
   if (background.type === 'color' && background.color) {
     ctx.fillStyle = background.color;
@@ -31,19 +34,19 @@ export function drawLayer(
   }
 
   const { ctx } = drawContext;
-  
+
   // Save current context state
   ctx.save();
-  
+
   // Apply layer transform
   applyTransform(ctx, layer.transform);
-  
+
   // Apply opacity
   ctx.globalAlpha = layer.transform.opacity;
-  
+
   // Apply blend mode (for now only 'normal' is supported)
   ctx.globalCompositeOperation = 'source-over';
-  
+
   try {
     // Draw the asset based on its type
     switch (asset.kind) {
@@ -60,7 +63,7 @@ export function drawLayer(
   } catch (error) {
     console.warn('Error drawing layer:', error);
   }
-  
+
   // Restore context state
   ctx.restore();
 }
@@ -71,12 +74,12 @@ function applyTransform(
 ): void {
   // Apply translation
   ctx.translate(transform.x, transform.y);
-  
+
   // Apply rotation
   if (transform.rotationDeg !== 0) {
     ctx.rotate(degToRad(transform.rotationDeg));
   }
-  
+
   // Apply scale
   if (transform.scaleX !== 1 || transform.scaleY !== 1) {
     ctx.scale(transform.scaleX, transform.scaleY);
@@ -90,15 +93,9 @@ function drawImageAsset(
   if (!asset.bitmap) {
     return;
   }
-  
+
   // Draw centered
-  ctx.drawImage(
-    asset.bitmap,
-    -asset.width / 2,
-    -asset.height / 2,
-    asset.width,
-    asset.height
-  );
+  ctx.drawImage(asset.bitmap, -asset.width / 2, -asset.height / 2, asset.width, asset.height);
 }
 
 function drawGifAsset(
@@ -109,12 +106,12 @@ function drawGifAsset(
   if (!asset.frames || asset.frames.length === 0) {
     return;
   }
-  
+
   // Find the current frame based on time
   const loopTime = currentTimeMs % asset.totalDurationMs;
   let accumulatedTime = 0;
   let currentFrame = asset.frames[0];
-  
+
   for (const frame of asset.frames) {
     accumulatedTime += frame.durationMs;
     if (loopTime < accumulatedTime) {
@@ -122,7 +119,7 @@ function drawGifAsset(
       break;
     }
   }
-  
+
   if (currentFrame.bitmap) {
     ctx.drawImage(
       currentFrame.bitmap,
@@ -142,26 +139,20 @@ function drawVideoAsset(
   if (!asset.videoEl) {
     return;
   }
-  
+
   // Seek video to current time (modulo duration for looping)
   const loopTime = currentTimeMs % asset.durationMs;
   const targetTime = loopTime / 1000;
-  
+
   // Only seek if we're significantly off
   const tolerance = 1 / 30; // ~33ms tolerance
   if (Math.abs(asset.videoEl.currentTime - targetTime) > tolerance) {
     asset.videoEl.currentTime = targetTime;
   }
-  
+
   // Draw video frame
   try {
-    ctx.drawImage(
-      asset.videoEl,
-      -asset.width / 2,
-      -asset.height / 2,
-      asset.width,
-      asset.height
-    );
+    ctx.drawImage(asset.videoEl, -asset.width / 2, -asset.height / 2, asset.width, asset.height);
   } catch (error) {
     // Video might not be ready yet
     console.warn('Error drawing video frame:', error);
@@ -176,20 +167,20 @@ export function drawGrid(
   panY: number
 ): void {
   const { ctx, width, height } = drawContext;
-  
+
   ctx.save();
-  
+
   // Set grid style
   ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
   ctx.lineWidth = 1 / zoom;
-  
+
   // Calculate visible grid range
   const scaledGridSize = gridSize * zoom;
   const startX = Math.floor(-panX / scaledGridSize) * scaledGridSize;
   const startY = Math.floor(-panY / scaledGridSize) * scaledGridSize;
   const endX = startX + width + scaledGridSize;
   const endY = startY + height + scaledGridSize;
-  
+
   // Draw vertical lines
   ctx.beginPath();
   for (let x = startX; x <= endX; x += scaledGridSize) {
@@ -198,7 +189,7 @@ export function drawGrid(
     ctx.lineTo(screenX, height);
   }
   ctx.stroke();
-  
+
   // Draw horizontal lines
   ctx.beginPath();
   for (let y = startY; y <= endY; y += scaledGridSize) {
@@ -207,7 +198,7 @@ export function drawGrid(
     ctx.lineTo(width, screenY);
   }
   ctx.stroke();
-  
+
   ctx.restore();
 }
 
@@ -219,50 +210,53 @@ export function drawSelectionHandles(
 ): void {
   const { ctx } = drawContext;
   const { transform } = layer;
-  
+
   ctx.save();
-  
+
   // Apply transform to get the bounds
   ctx.translate(transform.x, transform.y);
   ctx.rotate(degToRad(transform.rotationDeg));
   ctx.scale(transform.scaleX, transform.scaleY);
-  
+
   const halfWidth = asset.width / 2;
   const halfHeight = asset.height / 2;
-  
+
   // Draw selection outline
   ctx.strokeStyle = '#ff6b35'; // Fire color
   ctx.lineWidth = 2 / zoom;
   ctx.setLineDash([5 / zoom, 5 / zoom]);
   ctx.strokeRect(-halfWidth, -halfHeight, asset.width, asset.height);
-  
+
   // Draw handles
   ctx.fillStyle = '#ff6b35';
   ctx.setLineDash([]);
   const handleSize = 8 / zoom;
   const handlePositions = [
     [-halfWidth, -halfHeight], // Top-left
-    [0, -halfHeight],          // Top-center
-    [halfWidth, -halfHeight],  // Top-right
-    [halfWidth, 0],            // Center-right
-    [halfWidth, halfHeight],   // Bottom-right
-    [0, halfHeight],           // Bottom-center
-    [-halfWidth, halfHeight],  // Bottom-left
-    [-halfWidth, 0]            // Center-left
+    [0, -halfHeight], // Top-center
+    [halfWidth, -halfHeight], // Top-right
+    [halfWidth, 0], // Center-right
+    [halfWidth, halfHeight], // Bottom-right
+    [0, halfHeight], // Bottom-center
+    [-halfWidth, halfHeight], // Bottom-left
+    [-halfWidth, 0], // Center-left
   ];
-  
+
   handlePositions.forEach(([x, y]) => {
     ctx.fillRect(x - handleSize / 2, y - handleSize / 2, handleSize, handleSize);
   });
-  
+
   ctx.restore();
 }
 
-export function createOffscreenCanvas(width: number, height: number): OffscreenCanvas | HTMLCanvasElement {
+export function createOffscreenCanvas(
+  width: number,
+  height: number
+): OffscreenCanvas | HTMLCanvasElement {
   if (typeof OffscreenCanvas !== 'undefined') {
     return new OffscreenCanvas(width, height);
   }
-  
+
   // Fallback to regular canvas
   const canvas = document.createElement('canvas');
   canvas.width = width;
@@ -270,6 +264,8 @@ export function createOffscreenCanvas(width: number, height: number): OffscreenC
   return canvas;
 }
 
-export function getCanvasContext(canvas: HTMLCanvasElement | OffscreenCanvas): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null {
+export function getCanvasContext(
+  canvas: HTMLCanvasElement | OffscreenCanvas
+): CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D | null {
   return canvas.getContext('2d');
 }
