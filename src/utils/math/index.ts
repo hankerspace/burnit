@@ -46,9 +46,9 @@ export function rotatePoint(point: Point, origin: Point, angleRad: number): Poin
   const sin = Math.sin(angleRad);
   const dx = point.x - origin.x;
   const dy = point.y - origin.y;
-  
+
   return {
     x: origin.x + dx * cos - dy * sin,
-    y: origin.y + dx * sin + dy * cos
+    y: origin.y + dx * sin + dy * cos,
   };
 }

@@ -5,12 +5,12 @@ import { createBlobUrl } from '../../utils/file';
 export async function createImageAsset(file: File): Promise<ImageAsset> {
   const img = new Image();
   const src = createBlobUrl(file);
-  
+
   return new Promise((resolve, reject) => {
     img.onload = async () => {
       try {
         const bitmap = await createImageBitmap(img);
-        
+
         resolve({
           id: generateId(),
           name: file.name,
@@ -18,19 +18,19 @@ export async function createImageAsset(file: File): Promise<ImageAsset> {
           width: img.naturalWidth,
           height: img.naturalHeight,
           src,
-          bitmap
+          bitmap,
         });
       } catch (error) {
         URL.revokeObjectURL(src);
         reject(error);
       }
     };
-    
+
     img.onerror = () => {
       URL.revokeObjectURL(src);
       reject(new Error('Failed to load image'));
     };
-    
+
     img.src = src;
   });
 }
@@ -56,7 +56,7 @@ export async function createVideoAsset(file: File): Promise<VideoAsset> {
 
   const video = document.createElement('video');
   const src = createBlobUrl(file);
-  
+
   return new Promise((resolve, reject) => {
     const cleanup = () => {
       video.removeEventListener('loadedmetadata', onLoadedMetadata);
@@ -65,7 +65,7 @@ export async function createVideoAsset(file: File): Promise<VideoAsset> {
 
     const onLoadedMetadata = () => {
       cleanup();
-      
+
       // Ensure we have valid duration
       if (!isFinite(video.duration) || video.duration <= 0) {
         URL.revokeObjectURL(src);
@@ -81,7 +81,7 @@ export async function createVideoAsset(file: File): Promise<VideoAsset> {
         height: video.videoHeight,
         src,
         durationMs: video.duration * 1000,
-        videoEl: video
+        videoEl: video,
       });
     };
 
@@ -93,7 +93,7 @@ export async function createVideoAsset(file: File): Promise<VideoAsset> {
 
     video.addEventListener('loadedmetadata', onLoadedMetadata);
     video.addEventListener('error', onError);
-    
+
     video.preload = 'metadata';
     video.src = src;
   });
@@ -103,7 +103,7 @@ export function disposeImageAsset(asset: ImageAsset): void {
   if (asset.bitmap) {
     asset.bitmap.close();
   }
-  
+
   if (asset.src.startsWith('blob:')) {
     URL.revokeObjectURL(asset.src);
   }
@@ -115,7 +115,7 @@ export function disposeVideoAsset(asset: VideoAsset): void {
     asset.videoEl.removeAttribute('src');
     asset.videoEl.load();
   }
-  
+
   if (asset.src.startsWith('blob:')) {
     URL.revokeObjectURL(asset.src);
   }
@@ -124,7 +124,7 @@ export function disposeVideoAsset(asset: VideoAsset): void {
 export async function seekVideoToTime(video: HTMLVideoElement, timeMs: number): Promise<void> {
   return new Promise((resolve, reject) => {
     const targetTime = timeMs / 1000;
-    
+
     // If already at the correct time (within 1 frame), no need to seek
     const tolerance = 1 / 30; // ~33ms tolerance
     if (Math.abs(video.currentTime - targetTime) < tolerance) {
@@ -149,7 +149,7 @@ export async function seekVideoToTime(video: HTMLVideoElement, timeMs: number): 
 
     video.addEventListener('seeked', onSeeked, { once: true });
     video.addEventListener('error', onError, { once: true });
-    
+
     video.currentTime = targetTime;
   });
 }
@@ -177,7 +177,7 @@ class VideoPool {
   }
 
   clear(): void {
-    this.pool.forEach(video => {
+    this.pool.forEach((video) => {
       video.pause();
       video.removeAttribute('src');
       video.load();

@@ -10,27 +10,27 @@ describe('App Store', () => {
         currentTime: 0,
         isPlaying: false,
         speed: 1,
-        loopStartTime: 0
+        loopStartTime: 0,
       },
       canvas: {
         zoom: 1,
         panX: 0,
         panY: 0,
-        selectedLayerIds: []
+        selectedLayerIds: [],
       },
       selectedTool: 'select',
       showGrid: false,
       snapToGrid: false,
-      gridSize: 20
+      gridSize: 20,
     });
   });
 
   describe('Project Management', () => {
     it('should create a new project', () => {
       const { createNewProject } = useAppStore.getState();
-      
+
       createNewProject('Test Project');
-      
+
       const project = useAppStore.getState().currentProject;
       expect(project).toBeDefined();
       expect(project?.name).toBe('Test Project');
@@ -43,14 +43,14 @@ describe('App Store', () => {
 
     it('should update project settings', () => {
       const { createNewProject, updateProjectSettings } = useAppStore.getState();
-      
+
       createNewProject('Test Project');
       updateProjectSettings({
         width: 1280,
         height: 720,
-        fps: 24
+        fps: 24,
       });
-      
+
       const project = useAppStore.getState().currentProject;
       expect(project?.settings.width).toBe(1280);
       expect(project?.settings.height).toBe(720);
@@ -65,7 +65,7 @@ describe('App Store', () => {
 
     it('should add an asset', () => {
       const { addAsset } = useAppStore.getState();
-      
+
       const mockAsset = {
         id: 'test-asset-1',
         name: 'test.png',
@@ -73,18 +73,18 @@ describe('App Store', () => {
         width: 100,
         height: 100,
         src: 'blob:test-url',
-        bitmap: {} as ImageBitmap
+        bitmap: {} as ImageBitmap,
       };
-      
+
       addAsset(mockAsset);
-      
+
       const project = useAppStore.getState().currentProject;
       expect(project?.assets['test-asset-1']).toEqual(mockAsset);
     });
 
     it('should remove an asset and its layers', () => {
       const { addAsset, addLayer, removeAsset } = useAppStore.getState();
-      
+
       const mockAsset = {
         id: 'test-asset-1',
         name: 'test.png',
@@ -92,19 +92,19 @@ describe('App Store', () => {
         width: 100,
         height: 100,
         src: 'blob:test-url',
-        bitmap: {} as ImageBitmap
+        bitmap: {} as ImageBitmap,
       };
-      
+
       addAsset(mockAsset);
       addLayer('test-asset-1');
-      
+
       // Verify asset and layer were added
       let project = useAppStore.getState().currentProject;
       expect(project?.assets['test-asset-1']).toBeDefined();
       expect(project?.layers.length).toBe(1);
-      
+
       removeAsset('test-asset-1');
-      
+
       // Verify asset and layer were removed
       project = useAppStore.getState().currentProject;
       expect(project?.assets['test-asset-1']).toBeUndefined();
@@ -116,7 +116,7 @@ describe('App Store', () => {
     beforeEach(() => {
       const { createNewProject, addAsset } = useAppStore.getState();
       createNewProject('Test Project');
-      
+
       const mockAsset = {
         id: 'test-asset-1',
         name: 'test.png',
@@ -124,17 +124,17 @@ describe('App Store', () => {
         width: 100,
         height: 100,
         src: 'blob:test-url',
-        bitmap: {} as ImageBitmap
+        bitmap: {} as ImageBitmap,
       };
-      
+
       addAsset(mockAsset);
     });
 
     it('should add a layer', () => {
       const { addLayer } = useAppStore.getState();
-      
+
       const layerId = addLayer('test-asset-1');
-      
+
       const project = useAppStore.getState().currentProject;
       expect(project?.layers.length).toBe(1);
       expect(project?.layers[0].id).toBe(layerId);
@@ -145,14 +145,14 @@ describe('App Store', () => {
 
     it('should update layer transform', () => {
       const { addLayer, updateLayerTransform } = useAppStore.getState();
-      
+
       const layerId = addLayer('test-asset-1');
       updateLayerTransform(layerId, {
         x: 100,
         y: 200,
-        opacity: 0.5
+        opacity: 0.5,
       });
-      
+
       const project = useAppStore.getState().currentProject;
       const layer = project?.layers[0];
       expect(layer?.transform.x).toBe(100);
@@ -162,15 +162,15 @@ describe('App Store', () => {
 
     it('should select and deselect layers', () => {
       const { addLayer, selectLayer, deselectLayers } = useAppStore.getState();
-      
+
       const layerId = addLayer('test-asset-1');
       selectLayer(layerId);
-      
+
       let canvas = useAppStore.getState().canvas;
       expect(canvas.selectedLayerIds).toContain(layerId);
-      
+
       deselectLayers();
-      
+
       canvas = useAppStore.getState().canvas;
       expect(canvas.selectedLayerIds).toEqual([]);
     });
@@ -179,19 +179,19 @@ describe('App Store', () => {
   describe('Timeline', () => {
     it('should control playback', () => {
       const { play, pause, stop, setCurrentTime } = useAppStore.getState();
-      
+
       // Test play
       play();
       expect(useAppStore.getState().timeline.isPlaying).toBe(true);
-      
+
       // Test pause
       pause();
       expect(useAppStore.getState().timeline.isPlaying).toBe(false);
-      
+
       // Test time setting
       setCurrentTime(1000);
       expect(useAppStore.getState().timeline.currentTime).toBe(1000);
-      
+
       // Test stop
       stop();
       expect(useAppStore.getState().timeline.isPlaying).toBe(false);
@@ -200,15 +200,15 @@ describe('App Store', () => {
 
     it('should clamp speed values', () => {
       const { setSpeed } = useAppStore.getState();
-      
+
       // Test normal speed
       setSpeed(1.5);
       expect(useAppStore.getState().timeline.speed).toBe(1.5);
-      
+
       // Test minimum clamp
       setSpeed(0.05);
       expect(useAppStore.getState().timeline.speed).toBe(0.1);
-      
+
       // Test maximum clamp
       setSpeed(5);
       expect(useAppStore.getState().timeline.speed).toBe(2);

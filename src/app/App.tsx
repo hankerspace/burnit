@@ -11,7 +11,7 @@ import './App.css';
 function App() {
   const currentProject = useAppStore((state) => state.currentProject);
   const selectedLayerIds = useAppStore((state) => state.canvas.selectedLayerIds);
-  
+
   // State for copied layers
   const [copiedLayers, setCopiedLayers] = React.useState<Layer[]>([]);
 
@@ -20,7 +20,7 @@ function App() {
     if (!currentProject) {
       useAppStore.getState().createNewProject('Untitled Project');
     }
-    
+
     // Load the asset library
     useAppStore.getState().loadAssetLibrary();
   }, [currentProject]);
@@ -34,24 +34,24 @@ function App() {
       }
 
       const store = useAppStore.getState();
-      
+
       // Ctrl+C - Copy selected layers
       if (e.ctrlKey && e.key === 'c' && selectedLayerIds.length > 0 && currentProject) {
         e.preventDefault();
-        const layersToCopy = currentProject.layers.filter(layer => 
+        const layersToCopy = currentProject.layers.filter((layer) =>
           selectedLayerIds.includes(layer.id)
         );
         setCopiedLayers(layersToCopy);
       }
-      
+
       // Ctrl+V - Paste copied layers
       else if (e.ctrlKey && e.key === 'v' && copiedLayers.length > 0 && currentProject) {
         e.preventDefault();
         // Save state before adding new layers
         store.saveStateForUndo();
         const newLayerIds: string[] = [];
-        
-        copiedLayers.forEach(copiedLayer => {
+
+        copiedLayers.forEach((copiedLayer) => {
           // Check if the asset still exists in the current project
           const asset = currentProject.assets[copiedLayer.assetId];
           if (asset) {
@@ -63,33 +63,33 @@ function App() {
               store.updateLayer(newLayerId, {
                 visible: copiedLayer.visible,
                 locked: copiedLayer.locked,
-                blendMode: copiedLayer.blendMode
+                blendMode: copiedLayer.blendMode,
               });
               store.updateLayerTransform(newLayerId, {
                 ...copiedLayer.transform,
                 x: copiedLayer.transform.x + 20,
-                y: copiedLayer.transform.y + 20
+                y: copiedLayer.transform.y + 20,
               });
             }
           }
         });
-        
+
         // Select the newly pasted layers
         if (newLayerIds.length > 0) {
           store.selectLayers(newLayerIds);
         }
       }
-      
+
       // Delete - Remove selected layers
       else if (e.key === 'Delete' && selectedLayerIds.length > 0) {
         e.preventDefault();
         // Save state before destructive operation
         store.saveStateForUndo();
-        selectedLayerIds.forEach(layerId => {
+        selectedLayerIds.forEach((layerId) => {
           store.removeLayer(layerId);
         });
       }
-      
+
       // Ctrl+Z - Undo
       else if (e.ctrlKey && e.key === 'z') {
         e.preventDefault();

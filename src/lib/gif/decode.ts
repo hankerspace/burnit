@@ -19,7 +19,7 @@ export async function decodeGif(file: File): Promise<GifAsset> {
   const arrayBuffer = await file.arrayBuffer();
   const gif = parseGIF(arrayBuffer);
   const frames = decompressFrames(gif, true);
-  
+
   if (frames.length === 0) {
     throw new Error('No frames found in GIF');
   }
@@ -39,11 +39,11 @@ export async function decodeGif(file: File): Promise<GifAsset> {
 
   for (let i = 0; i < frames.length; i++) {
     const frame = frames[i] as ParsedGifFrame;
-    
+
     // Handle disposal of previous frame
     if (i > 0) {
       const prevFrame = frames[i - 1] as ParsedGifFrame;
-      
+
       if (prevFrame.disposalType === 2) {
         // Restore to background
         ctx.clearRect(0, 0, width, height);
@@ -59,25 +59,21 @@ export async function decodeGif(file: File): Promise<GifAsset> {
     }
 
     // Create ImageData from frame patch
-    const imageData = new ImageData(
-      frame.patch,
-      frame.dims.width,
-      frame.dims.height
-    );
+    const imageData = new ImageData(frame.patch, frame.dims.width, frame.dims.height);
 
     // Draw frame to canvas
     ctx.putImageData(imageData, frame.dims.left, frame.dims.top);
 
     // Create ImageBitmap from current canvas state
     const bitmap = await createImageBitmap(canvas);
-    
+
     const durationMs = Math.max(frame.delay, 10);
-    
+
     gifFrames.push({
       bitmap,
-      durationMs
+      durationMs,
     });
-    
+
     totalDurationMs += durationMs;
   }
 
@@ -90,7 +86,7 @@ export async function decodeGif(file: File): Promise<GifAsset> {
     src: createBlobUrl(file),
     frames: gifFrames,
     totalDurationMs,
-    loopCount: (gif as { gce?: { loopCount?: number } }).gce?.loopCount || 'infinite'
+    loopCount: (gif as { gce?: { loopCount?: number } }).gce?.loopCount || 'infinite',
   };
 }
 
@@ -134,7 +130,7 @@ export function getFrameIndexAtTime(gifAsset: GifAsset, timeMs: number): number 
 
 export function disposeGifAsset(gifAsset: GifAsset): void {
   // Clean up ImageBitmaps
-  gifAsset.frames.forEach(frame => {
+  gifAsset.frames.forEach((frame) => {
     if (frame.bitmap) {
       frame.bitmap.close();
     }

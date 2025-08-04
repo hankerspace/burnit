@@ -1,50 +1,57 @@
 import { useState, useCallback } from 'react';
 import { useAppStore } from '../../state';
-import { exportProjectAsPNG, exportProjectAsJPEG, exportProjectAsGIF, exportProjectAsWebM, downloadBlob, generateExportFilename } from '../../lib/export';
+import {
+  exportProjectAsPNG,
+  exportProjectAsJPEG,
+  exportProjectAsGIF,
+  exportProjectAsWebM,
+  downloadBlob,
+  generateExportFilename,
+} from '../../lib/export';
 import './ExportDialog.css';
 
 export function ExportDialog() {
   const [isOpen, setIsOpen] = useState(false);
   const [exportFormat, setExportFormat] = useState<'png' | 'jpeg' | 'gif' | 'webm'>('gif');
   const [isExporting, setIsExporting] = useState(false);
-  
+
   const currentProject = useAppStore((state) => state.currentProject);
   const timeline = useAppStore((state) => state.timeline);
 
   // Helper function to resolve actual duration from project settings
   const getActualDuration = useCallback((project: typeof currentProject) => {
     if (!project) return 3000; // fallback
-    
+
     if (project.settings.loopDurationMs !== 'auto') {
       return project.settings.loopDurationMs;
     }
-    
+
     // Calculate max duration from animated assets (same logic as CanvasStage)
     const animatedAssets = Object.values(project.assets).filter(
-      asset => asset.kind === 'gif' || asset.kind === 'video'
+      (asset) => asset.kind === 'gif' || asset.kind === 'video'
     );
-    
+
     if (animatedAssets.length > 0) {
       return Math.max(
-        ...animatedAssets.map(asset => 
+        ...animatedAssets.map((asset) =>
           asset.kind === 'gif' ? asset.totalDurationMs : asset.durationMs
         )
       );
     }
-    
+
     return 3000; // fallback if no animated assets
   }, []);
 
   const handleExport = useCallback(async () => {
     if (!currentProject) return;
-    
+
     setIsExporting(true);
-    
+
     try {
       const currentTime = timeline.currentTime;
       const filename = generateExportFilename(currentProject.name, exportFormat);
       const actualDuration = getActualDuration(currentProject);
-      
+
       if (exportFormat === 'png') {
         const blob = await exportProjectAsPNG(currentProject, currentTime);
         downloadBlob(blob, filename);
@@ -84,14 +91,11 @@ export function ExportDialog() {
       <div className="export-dialog" onClick={(e) => e.stopPropagation()}>
         <div className="dialog-header">
           <h3>Export Project</h3>
-          <button
-            className="dialog-close btn btn-icon"
-            onClick={() => setIsOpen(false)}
-          >
+          <button className="dialog-close btn btn-icon" onClick={() => setIsOpen(false)}>
             ×
           </button>
         </div>
-        
+
         <div className="dialog-content">
           <div className="export-options">
             <div className="option-group">
@@ -124,12 +128,13 @@ export function ExportDialog() {
                 </button>
               </div>
             </div>
-            
+
             {currentProject && (
               <div className="export-preview">
                 <div className="preview-info">
                   <p>
-                    <strong>Size:</strong> {currentProject.settings.width} × {currentProject.settings.height}
+                    <strong>Size:</strong> {currentProject.settings.width} ×{' '}
+                    {currentProject.settings.height}
                   </p>
                   <p>
                     <strong>FPS:</strong> {currentProject.settings.fps}
@@ -144,13 +149,9 @@ export function ExportDialog() {
             )}
           </div>
         </div>
-        
+
         <div className="dialog-footer">
-          <button
-            className="btn"
-            onClick={() => setIsOpen(false)}
-            disabled={isExporting}
-          >
+          <button className="btn" onClick={() => setIsOpen(false)} disabled={isExporting}>
             Cancel
           </button>
           <button

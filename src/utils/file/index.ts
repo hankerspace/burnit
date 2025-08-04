@@ -5,7 +5,7 @@ export const SUPPORTED_VIDEO_TYPES = ['video/webm'] as const;
 export const ALL_SUPPORTED_TYPES = [
   ...SUPPORTED_IMAGE_TYPES,
   ...SUPPORTED_GIF_TYPES,
-  ...SUPPORTED_VIDEO_TYPES
+  ...SUPPORTED_VIDEO_TYPES,
 ] as const;
 
 export function getFileExtension(filename: string): string {
@@ -14,19 +14,19 @@ export function getFileExtension(filename: string): string {
 }
 
 export function isImageFile(file: File): boolean {
-  return SUPPORTED_IMAGE_TYPES.includes(file.type as typeof SUPPORTED_IMAGE_TYPES[number]);
+  return SUPPORTED_IMAGE_TYPES.includes(file.type as (typeof SUPPORTED_IMAGE_TYPES)[number]);
 }
 
 export function isGifFile(file: File): boolean {
-  return SUPPORTED_GIF_TYPES.includes(file.type as typeof SUPPORTED_GIF_TYPES[number]);
+  return SUPPORTED_GIF_TYPES.includes(file.type as (typeof SUPPORTED_GIF_TYPES)[number]);
 }
 
 export function isVideoFile(file: File): boolean {
-  return SUPPORTED_VIDEO_TYPES.includes(file.type as typeof SUPPORTED_VIDEO_TYPES[number]);
+  return SUPPORTED_VIDEO_TYPES.includes(file.type as (typeof SUPPORTED_VIDEO_TYPES)[number]);
 }
 
 export function isSupportedFile(file: File): boolean {
-  return ALL_SUPPORTED_TYPES.includes(file.type as typeof ALL_SUPPORTED_TYPES[number]);
+  return ALL_SUPPORTED_TYPES.includes(file.type as (typeof ALL_SUPPORTED_TYPES)[number]);
 }
 
 export function createBlobUrl(file: File): string {
@@ -50,11 +50,11 @@ export function downloadBlob(blob: Blob, filename: string): void {
 
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 B';
-  
+
   const k = 1024;
   const sizes = ['B', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  
+
   const size = bytes / Math.pow(k, i);
   return `${size % 1 === 0 ? size.toFixed(0) : size.toFixed(1)} ${sizes[i]}`;
 }
