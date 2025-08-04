@@ -185,27 +185,99 @@
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .timeline {
-    height: 120px;
-    min-height: 100px;
+    height: 140px;
+    min-height: 120px;
   }
   
   .timeline-header {
     padding: var(--spacing-xs) var(--spacing-sm);
+    flex-wrap: wrap;
+    gap: var(--spacing-xs);
+  }
+  
+  .timeline-controls {
+    gap: var(--spacing-xs);
+  }
+  
+  .timeline-controls .btn {
+    min-width: 44px;
+    min-height: 44px;
+    padding: var(--spacing-xs);
   }
   
   .timeline-settings {
     gap: var(--spacing-sm);
   }
   
+  .speed-control {
+    gap: var(--spacing-xs);
+  }
+  
+  .speed-control select {
+    min-width: 50px;
+    padding: var(--spacing-xs);
+  }
+  
   .fps-display {
     display: none;
   }
   
+  .timeline-info {
+    margin: 0;
+    order: 3;
+    width: 100%;
+    text-align: center;
+  }
+  
   .asset-track {
     height: 20px;
+    margin-bottom: var(--spacing-xs);
   }
   
   .time-label {
-    font-size: 0.6rem;
+    font-size: 0.7rem;
+  }
+  
+  .time-display {
+    font-size: 0.8rem;
+  }
+  
+  /* Make playhead handle larger for touch */
+  .playhead-handle {
+    width: 18px;
+    height: 18px;
+    left: -9px;
+    top: -6px;
+  }
+  
+  /* Touch-friendly timeline track */
+  .timeline-track {
+    touch-action: manipulation;
+    padding: var(--spacing-sm) 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .timeline {
+    height: 120px;
+    min-height: 100px;
+  }
+  
+  .timeline-header {
+    padding: var(--spacing-xs);
+  }
+  
+  .timeline-controls .btn {
+    min-width: 40px;
+    min-height: 40px;
+    font-size: 0.9rem;
+  }
+  
+  .speed-control select {
+    font-size: 0.8rem;
+  }
+  
+  .time-display {
+    font-size: 0.75rem;
   }
 }

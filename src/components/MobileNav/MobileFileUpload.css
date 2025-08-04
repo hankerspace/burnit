@@ -1,0 +1,218 @@
+.mobile-upload-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90vw;
+  max-width: 400px;
+  max-height: 80vh;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  z-index: 1001;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mobile-upload-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-lg);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+}
+
+.mobile-upload-header h3 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-normal);
+  font-size: 1.2rem;
+}
+
+.close-btn:hover {
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+}
+
+.mobile-upload-content {
+  padding: var(--spacing-lg);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.mobile-upload-area {
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  text-align: center;
+  transition: all var(--transition-normal);
+  cursor: pointer;
+  min-height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-upload-area:hover {
+  border-color: var(--color-fire-primary);
+  background: rgba(255, 107, 53, 0.05);
+}
+
+.mobile-upload-area.drag-over {
+  border-color: var(--color-fire-primary);
+  background: rgba(255, 107, 53, 0.1);
+  box-shadow: var(--shadow-fire);
+}
+
+.mobile-upload-area.uploading {
+  border-color: var(--color-fire-secondary);
+  background: rgba(255, 149, 0, 0.05);
+}
+
+.upload-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.upload-icon {
+  font-size: 2.5rem;
+  margin-bottom: var(--spacing-sm);
+}
+
+.upload-spinner {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, var(--color-fire-primary), var(--color-fire-secondary));
+  border-radius: 50%;
+  margin-bottom: var(--spacing-sm);
+}
+
+.mobile-upload-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+}
+
+.mobile-action-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-lg);
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  text-align: center;
+  min-height: 80px;
+}
+
+.mobile-action-btn:hover {
+  background: var(--color-bg-primary);
+  border-color: var(--color-fire-primary);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.mobile-action-btn:active {
+  transform: translateY(0);
+}
+
+.mobile-action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mobile-action-btn:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.action-icon {
+  font-size: 1.5rem;
+}
+
+.action-text {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.file-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Animation for dialog appearance */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -40%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.mobile-upload-dialog {
+  animation: slideInUp 0.3s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 480px) {
+  .mobile-upload-dialog {
+    width: 95vw;
+    max-height: 85vh;
+  }
+  
+  .mobile-upload-content {
+    padding: var(--spacing-md);
+  }
+  
+  .mobile-upload-area {
+    padding: var(--spacing-lg);
+    min-height: 100px;
+  }
+  
+  .upload-icon {
+    font-size: 2rem;
+  }
+  
+  .mobile-action-btn {
+    padding: var(--spacing-md);
+    min-height: 70px;
+  }
+  
+  .action-icon {
+    font-size: 1.3rem;
+  }
+  
+  .action-text {
+    font-size: 0.8rem;
+  }
+}

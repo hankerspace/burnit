@@ -1,0 +1,210 @@
+.mobile-nav {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+  position: relative;
+  z-index: 20;
+}
+
+.mobile-nav-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: transparent;
+  border: none;
+  color: var(--color-text-primary);
+  cursor: pointer;
+  border-radius: var(--radius-md);
+  transition: all var(--transition-normal);
+  font-size: 1.2rem;
+}
+
+.mobile-nav-btn:hover {
+  background: var(--color-bg-elevated);
+}
+
+.mobile-nav-btn.active {
+  background: var(--color-fire-primary);
+  color: white;
+}
+
+/* Hamburger menu icon */
+.hamburger {
+  width: 20px;
+  height: 16px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.hamburger span {
+  display: block;
+  height: 2px;
+  width: 100%;
+  background: currentColor;
+  border-radius: 1px;
+  transition: all var(--transition-normal);
+}
+
+.mobile-nav-btn.active .hamburger span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.mobile-nav-btn.active .hamburger span:nth-child(2) {
+  opacity: 0;
+}
+
+.mobile-nav-btn.active .hamburger span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+}
+
+/* Floating Action Button */
+.fab-container {
+  position: fixed;
+  bottom: var(--spacing-xl);
+  right: var(--spacing-lg);
+  z-index: 1000;
+  display: none;
+}
+
+.fab-main {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, var(--color-fire-primary), var(--color-fire-secondary));
+  border: none;
+  border-radius: 50%;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg), var(--shadow-fire);
+  transition: all var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fab-main:hover {
+  transform: scale(1.1);
+}
+
+.fab-main:active {
+  transform: scale(0.95);
+}
+
+.fab-main.active {
+  transform: rotate(45deg);
+}
+
+.fab-menu {
+  position: absolute;
+  bottom: 70px;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  animation: fabMenuSlideIn 0.3s ease-out;
+}
+
+@keyframes fabMenuSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fab-action {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-primary);
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  min-width: 140px;
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+}
+
+.fab-action:hover {
+  background: var(--color-bg-secondary);
+  border-color: var(--color-fire-primary);
+  transform: translateX(-4px);
+}
+
+.fab-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.fab-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Mobile overlay for sidebars */
+.mobile-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 5;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--transition-normal);
+}
+
+.mobile-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Mobile responsive styles */
+@media (max-width: 768px) {
+  .mobile-nav {
+    display: flex;
+  }
+  
+  .fab-container {
+    display: block;
+  }
+}
+
+/* Extra small devices */
+@media (max-width: 480px) {
+  .fab-container {
+    bottom: var(--spacing-lg);
+    right: var(--spacing-md);
+  }
+  
+  .fab-main {
+    width: 50px;
+    height: 50px;
+    font-size: 1.3rem;
+  }
+  
+  .fab-action {
+    min-width: 120px;
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  
+  .fab-label {
+    font-size: 0.8rem;
+  }
+}

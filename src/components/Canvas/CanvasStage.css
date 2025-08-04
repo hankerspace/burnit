@@ -203,17 +203,62 @@
 @media (max-width: 768px) {
   .canvas-stage {
     min-height: 300px;
+    padding: var(--spacing-sm);
   }
   
-  .canvas-controls,
+  .canvas-container {
+    max-width: 100%;
+    max-height: 100%;
+  }
+  
+  .canvas-controls {
+    top: var(--spacing-sm);
+    right: var(--spacing-sm);
+    gap: var(--spacing-xs);
+  }
+  
+  .canvas-controls .btn {
+    padding: var(--spacing-sm);
+    min-width: 44px;
+    min-height: 44px;
+  }
+  
   .zoom-controls {
-    position: static;
-    margin: var(--spacing-sm);
+    bottom: var(--spacing-sm);
+    right: var(--spacing-sm);
+    padding: var(--spacing-xs);
+  }
+  
+  .zoom-slider {
+    width: 80px;
   }
   
   .canvas-info {
-    position: static;
-    margin: var(--spacing-sm);
-    display: inline-block;
+    bottom: var(--spacing-sm);
+    left: var(--spacing-sm);
+    font-size: 0.75rem;
+  }
+  
+  /* Make selection handles larger for touch */
+  .selection-handle {
+    width: 12px;
+    height: 12px;
+    border-width: 2px;
+  }
+  
+  /* Touch-friendly canvas interactions */
+  .canvas {
+    touch-action: manipulation;
+  }
+  
+  /* Hide some controls on very small screens */
+  @media (max-width: 480px) {
+    .canvas-controls .btn:not(:first-child) {
+      display: none;
+    }
+    
+    .zoom-controls {
+      display: none;
+    }
   }
 }
