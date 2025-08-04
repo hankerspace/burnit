@@ -15,21 +15,17 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        // Use system Chrome if available
+        channel: process.env.CI ? 'chrome' : undefined,
+      },
     },
   ],
 
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: true,
   },
 });

@@ -15,65 +15,66 @@ test.describe('Burn It Application', () => {
     await expect(page.getByRole('button', { name: /Layers/ })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Inspector' })).toBeVisible();
     
-    // Check that canvas area is present
-    await expect(page.locator('.canvas-stage')).toBeVisible();
+    // Check that main canvas area is present
+    await expect(page.getByRole('main')).toBeVisible();
     
-    // Check that timeline is present
-    await expect(page.locator('.timeline')).toBeVisible();
+    // Check that timeline controls are present
+    await expect(page.locator('text=0.0s / 5.0s')).toBeVisible();
     
     // Check that export button is present
-    await expect(page.locator('button:has-text("Export")')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Export' })).toBeVisible();
   });
 
   test('should show empty states correctly', async ({ page }) => {
     await page.goto('/');
     
     // Assets should show empty state
-    await expect(page.locator('text=No assets yet')).toBeVisible();
+    await expect(page.locator('text=No assets yet. Add some files to get started!')).toBeVisible();
     
-    // Layers should show empty state
-    await expect(page.locator('text=No layers yet')).toBeVisible();
+    // Switch to layers tab and check empty state
+    await page.getByRole('button', { name: '📋 Layers' }).click();
+    await expect(page.locator('text=No layers yet. Add some assets to create layers!')).toBeVisible();
     
     // Inspector should show empty state
-    await expect(page.locator('text=Select a layer to edit')).toBeVisible();
+    await expect(page.locator('text=Select a layer to edit its properties')).toBeVisible();
   });
 
   test('should have working timeline controls', async ({ page }) => {
     await page.goto('/');
     
-    // Check play/pause button (could show either ▶ or ⏸)
-    const playPauseButton = page.getByRole('button', { name: /Play|Pause/ });
-    await expect(playPauseButton).toBeVisible();
+    // Check play button (shows ▶)
+    const playButton = page.getByRole('button', { name: '▶' });
+    await expect(playButton).toBeVisible();
     
     // Check stop button  
-    const stopButton = page.getByRole('button', { name: 'Stop' });
+    const stopButton = page.getByRole('button', { name: '⏹' });
     await expect(stopButton).toBeVisible();
     
     // Check speed selector
-    const speedSelect = page.locator('select');
+    const speedSelect = page.getByRole('combobox');
     await expect(speedSelect).toBeVisible();
     
-    // Check time display (more flexible pattern)
-    await expect(page.locator('.time-display')).toBeVisible();
+    // Check time display
+    await expect(page.locator('text=0.0s / 5.0s')).toBeVisible();
   });
 
   test('should open export dialog', async ({ page }) => {
     await page.goto('/');
     
     // Click export button
-    await page.locator('button:has-text("Export")').click();
+    await page.getByRole('button', { name: 'Export' }).click();
     
     // Check that export dialog opens
     await expect(page.locator('text=Export Project')).toBeVisible();
     
-    // Check format options (format selector buttons)
-    await expect(page.locator('.format-btn:has-text("PNG")')).toBeVisible();
-    await expect(page.locator('.format-btn:has-text("JPEG")')).toBeVisible();
-    await expect(page.locator('.format-btn:has-text("GIF")')).toBeVisible();
-    await expect(page.locator('.format-btn:has-text("WebM")')).toBeVisible();
+    // Check format options (format selector buttons) - use exact match to avoid conflict with "Export GIF"
+    await expect(page.getByRole('button', { name: 'PNG', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'JPEG', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'GIF', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'WebM', exact: true })).toBeVisible();
     
     // Close dialog
-    await page.locator('button:has-text("Cancel")').click();
+    await page.getByRole('button', { name: 'Cancel' }).click();
     await expect(page.locator('text=Export Project')).not.toBeVisible();
   });
 
