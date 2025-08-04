@@ -232,7 +232,9 @@ export function CanvasStage() {
       }
 
       const { transform } = layer;
-      const handleSize = 8; // Same as in drawSelectionHandles
+      // Use larger handle size for mobile devices
+      const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const handleSize = isMobile ? 12 : 8;
       const halfHandleSize = handleSize / 2;
 
       // Calculate the layer's bounding box
@@ -286,6 +288,18 @@ export function CanvasStage() {
     },
     [currentProject]
   );
+
+  // Helper function to get coordinates from mouse or touch event
+  const getEventCoordinates = useCallback((e: React.MouseEvent | React.TouchEvent) => {
+    if ('touches' in e) {
+      // Touch event
+      const touch = e.touches[0] || e.changedTouches[0];
+      return { clientX: touch.clientX, clientY: touch.clientY };
+    } else {
+      // Mouse event
+      return { clientX: e.clientX, clientY: e.clientY };
+    }
+  }, []);
 
   // Helper function to create ImageAsset from File
   const createImageAsset = useCallback(async (file: File): Promise<ImageAsset> => {
@@ -345,12 +359,16 @@ export function CanvasStage() {
     [createImageAsset]
   );
 
-  // Handle mouse down - start drag or select
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
+  // Handle pointer down - start drag or select (works for both mouse and touch)
+  const handlePointerDown = useCallback(
+    (e: React.MouseEvent | React.TouchEvent) => {
       if (!canvasRef.current || !currentProject) return;
 
-      const { x, y } = screenToCanvas(e.clientX, e.clientY);
+      // Prevent default touch behavior to avoid scrolling
+      e.preventDefault();
+
+      const { clientX, clientY } = getEventCoordinates(e);
+      const { x, y } = screenToCanvas(clientX, clientY);
 
       // First check if we're clicking on a resize handle of a selected layer
       const { layers, assets } = currentProject;
@@ -423,12 +441,12 @@ export function CanvasStage() {
         useAppStore.getState().deselectLayers();
       }
     },
-    [currentProject, isPointInLayer, getResizeHandle, canvasState.selectedLayerIds, screenToCanvas]
+    [currentProject, isPointInLayer, getResizeHandle, canvasState.selectedLayerIds, screenToCanvas, getEventCoordinates]
   );
 
-  // Handle mouse move - drag or resize selected layer
-  const handleMouseMove = useCallback(
-    (e: React.MouseEvent) => {
+  // Handle pointer move - drag or resize selected layer (works for both mouse and touch)
+  const handlePointerMove = useCallback(
+    (e: React.MouseEvent | React.TouchEvent) => {
       if (
         (!dragStateRef.current.isDragging && !dragStateRef.current.isResizing) ||
         !dragStateRef.current.draggedLayerId ||
@@ -437,7 +455,11 @@ export function CanvasStage() {
         return;
       }
 
-      const { x, y } = screenToCanvas(e.clientX, e.clientY);
+      // Prevent default to avoid scrolling
+      e.preventDefault();
+
+      const { clientX, clientY } = getEventCoordinates(e);
+      const { x, y } = screenToCanvas(clientX, clientY);
 
       if (dragStateRef.current.isResizing && dragStateRef.current.resizeHandle) {
         // Handle resizing
@@ -527,11 +549,11 @@ export function CanvasStage() {
         });
       }
     },
-    [screenToCanvas, currentProject]
+    [screenToCanvas, currentProject, getEventCoordinates]
   );
 
-  // Handle mouse up - end drag or resize
-  const handleMouseUp = useCallback(() => {
+  // Handle pointer up - end drag or resize (works for both mouse and touch)
+  const handlePointerUp = useCallback(() => {
     dragStateRef.current = {
       isDragging: false,
       isResizing: false,
@@ -627,10 +649,17 @@ export function CanvasStage() {
                         : 'grab'
                 : 'grab',
           }}
-          onMouseDown={handleMouseDown}
-          onMouseMove={handleMouseMove}
-          onMouseUp={handleMouseUp}
-          onMouseLeave={handleMouseUp}
+          // Mouse events
+          onMouseDown={handlePointerDown}
+          onMouseMove={handlePointerMove}
+          onMouseUp={handlePointerUp}
+          onMouseLeave={handlePointerUp}
+          // Touch events
+          onTouchStart={handlePointerDown}
+          onTouchMove={handlePointerMove}
+          onTouchEnd={handlePointerUp}
+          onTouchCancel={handlePointerUp}
+          // Drag & Drop events
           onDragEnter={handleDragEnter}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}

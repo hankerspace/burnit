@@ -227,10 +227,14 @@ export function drawSelectionHandles(
   ctx.setLineDash([5 / zoom, 5 / zoom]);
   ctx.strokeRect(-halfWidth, -halfHeight, asset.width, asset.height);
 
-  // Draw handles
+  // Draw handles - larger size for mobile devices
   ctx.fillStyle = '#ff6b35';
   ctx.setLineDash([]);
-  const handleSize = 8 / zoom;
+  
+  // Detect mobile devices and use larger handles
+  const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+  const handleSize = (isMobile ? 12 : 8) / zoom;
+  
   const handlePositions = [
     [-halfWidth, -halfHeight], // Top-left
     [0, -halfHeight], // Top-center
