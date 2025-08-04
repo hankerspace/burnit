@@ -53,7 +53,7 @@ class LibraryManager {
       // Load all assets
       const loadPromises = LIBRARY_ASSETS.map(async (assetInfo) => {
         try {
-          const response = await fetch(`/src/assets/library/${assetInfo.filename}`);
+          const response = await fetch(`/assets/library/${assetInfo.filename}`);
           if (!response.ok) {
             throw new Error(`Failed to fetch ${assetInfo.filename}: ${response.statusText}`);
           }
