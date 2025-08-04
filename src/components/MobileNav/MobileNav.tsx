@@ -5,6 +5,7 @@ interface MobileNavProps {
   onToggleLeftSidebar: () => void;
   onToggleRightSidebar: () => void;
   onShowAssetUpload: () => void;
+  onShowCameraCapture: () => void;
   onExport: () => void;
   isLeftSidebarOpen: boolean;
   isRightSidebarOpen: boolean;
@@ -14,6 +15,7 @@ export function MobileNav({
   onToggleLeftSidebar,
   onToggleRightSidebar,
   onShowAssetUpload,
+  onShowCameraCapture,
   onExport,
   isLeftSidebarOpen,
   isRightSidebarOpen,
@@ -65,6 +67,18 @@ export function MobileNav({
         
         {showFAB && (
           <div className="fab-menu">
+            <button
+              className="fab-action"
+              onClick={() => {
+                onShowCameraCapture();
+                setShowFAB(false);
+              }}
+              aria-label="Take photo"
+            >
+              <span className="fab-icon">📷</span>
+              <span className="fab-label">Take Photo</span>
+            </button>
+            
             <button
               className="fab-action"
               onClick={() => {

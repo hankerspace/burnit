@@ -6,6 +6,7 @@ import { Inspector } from '../components/Inspector/Inspector';
 import { ExportDialog } from '../components/Export/ExportDialog';
 import { MobileNav } from '../components/MobileNav/MobileNav';
 import { MobileFileUpload } from '../components/MobileNav/MobileFileUpload';
+import { CameraCapture } from '../components/Camera/CameraCapture';
 import { useAppStore } from '../state';
 import type { Layer } from '../types';
 import './App.css';
@@ -21,6 +22,7 @@ function App() {
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = React.useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = React.useState(false);
   const [showMobileUpload, setShowMobileUpload] = React.useState(false);
+  const [showCameraCapture, setShowCameraCapture] = React.useState(false);
 
   React.useEffect(() => {
     // Create a default project if none exists
@@ -137,6 +139,7 @@ function App() {
         onToggleLeftSidebar={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}
         onToggleRightSidebar={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
         onShowAssetUpload={() => setShowMobileUpload(true)}
+        onShowCameraCapture={() => setShowCameraCapture(true)}
         onExport={() => {/* Export functionality will be handled by ExportDialog */}}
         isLeftSidebarOpen={isLeftSidebarOpen}
         isRightSidebarOpen={isRightSidebarOpen}
@@ -172,6 +175,12 @@ function App() {
       <MobileFileUpload
         isOpen={showMobileUpload}
         onClose={() => setShowMobileUpload(false)}
+      />
+
+      {/* Camera Capture Dialog */}
+      <CameraCapture
+        isOpen={showCameraCapture}
+        onClose={() => setShowCameraCapture(false)}
       />
     </div>
   );

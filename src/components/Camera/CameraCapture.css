@@ -1,0 +1,225 @@
+.camera-capture-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.camera-capture-modal {
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-lg);
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.camera-capture-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-bg-secondary);
+}
+
+.camera-capture-header h3 {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.close-button:hover {
+  color: var(--color-text-primary);
+  background: var(--color-bg-hover);
+}
+
+.camera-capture-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-lg);
+}
+
+.camera-preview {
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #000;
+  box-shadow: var(--shadow-md);
+}
+
+.camera-video {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 400px;
+  max-height: 300px;
+  object-fit: cover;
+}
+
+.camera-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-lg);
+}
+
+.capture-button {
+  background: var(--color-fire-primary);
+  border: 3px solid var(--color-fire-secondary);
+  color: white;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.capture-button:hover:not(:disabled) {
+  background: var(--color-fire-secondary);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-lg);
+}
+
+.capture-button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.capture-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.capture-icon {
+  font-size: 1.8rem;
+}
+
+.capture-spinner {
+  font-size: 1.5rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.camera-error {
+  text-align: center;
+  color: var(--color-text-muted);
+  padding: var(--spacing-xl);
+}
+
+.camera-error p {
+  margin-bottom: var(--spacing-md);
+  font-size: 1rem;
+}
+
+.retry-button {
+  background: var(--color-fire-primary);
+  border: 1px solid var(--color-fire-secondary);
+  color: white;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.retry-button:hover {
+  background: var(--color-fire-secondary);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .camera-capture-modal {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+  
+  .camera-video {
+    max-width: 90vw;
+    max-height: 60vh;
+  }
+  
+  .capture-button {
+    width: 80px;
+    height: 80px;
+    font-size: 1.8rem;
+  }
+  
+  .camera-capture-content {
+    padding: var(--spacing-md);
+    gap: var(--spacing-md);
+  }
+}
+
+/* Portrait orientation on mobile */
+@media (max-width: 480px) and (orientation: portrait) {
+  .camera-video {
+    max-width: 85vw;
+    max-height: 50vh;
+  }
+  
+  .camera-capture-header {
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  
+  .camera-capture-header h3 {
+    font-size: 1rem;
+  }
+}
+
+/* Landscape orientation on mobile */
+@media (max-height: 500px) and (orientation: landscape) {
+  .camera-capture-modal {
+    max-height: 95vh;
+  }
+  
+  .camera-video {
+    max-height: 40vh;
+  }
+  
+  .camera-capture-content {
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+  }
+}
