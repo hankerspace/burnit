@@ -248,7 +248,7 @@
   
   /* Touch-friendly canvas interactions */
   .canvas {
-    touch-action: manipulation;
+    touch-action: none; /* Prevent all browser touch gestures */
   }
   
   /* Hide some controls on very small screens */

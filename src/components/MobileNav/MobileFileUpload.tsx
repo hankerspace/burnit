@@ -16,7 +16,7 @@ export function MobileFileUpload({ isOpen, onClose }: MobileFileUploadProps) {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  
+
   const addAsset = useAppStore((state) => state.addAsset);
 
   const handleFileUpload = useCallback(
@@ -59,7 +59,7 @@ export function MobileFileUpload({ isOpen, onClose }: MobileFileUploadProps) {
     (e: React.DragEvent) => {
       e.preventDefault();
       setIsDragOver(false);
-      
+
       const files = e.dataTransfer.files;
       if (files.length > 0) {
         handleFileUpload(files);
@@ -108,7 +108,7 @@ export function MobileFileUpload({ isOpen, onClose }: MobileFileUploadProps) {
             ✕
           </button>
         </div>
-        
+
         <div className="mobile-upload-content">
           <div
             className={`mobile-upload-area ${isDragOver ? 'drag-over' : ''} ${isUploading ? 'uploading' : ''}`}
@@ -121,7 +121,9 @@ export function MobileFileUpload({ isOpen, onClose }: MobileFileUploadProps) {
               {isUploading ? (
                 <>
                   <div className="upload-spinner animate-glow"></div>
-                  <p><strong>Uploading...</strong></p>
+                  <p>
+                    <strong>Uploading...</strong>
+                  </p>
                 </>
               ) : (
                 <>
@@ -131,9 +133,7 @@ export function MobileFileUpload({ isOpen, onClose }: MobileFileUploadProps) {
                     <br />
                     or drag & drop here
                   </p>
-                  <p className="text-muted text-sm">
-                    Supports PNG, JPEG, GIF, WebM
-                  </p>
+                  <p className="text-muted text-sm">Supports PNG, JPEG, GIF, WebM</p>
                 </>
               )}
             </div>
@@ -148,12 +148,8 @@ export function MobileFileUpload({ isOpen, onClose }: MobileFileUploadProps) {
               <span className="action-icon">📁</span>
               <span className="action-text">Browse Files</span>
             </button>
-            
-            <button
-              className="mobile-action-btn"
-              onClick={handleTakePhoto}
-              disabled={isUploading}
-            >
+
+            <button className="mobile-action-btn" onClick={handleTakePhoto} disabled={isUploading}>
               <span className="action-icon">📷</span>
               <span className="action-text">Take Photo</span>
             </button>
@@ -168,7 +164,7 @@ export function MobileFileUpload({ isOpen, onClose }: MobileFileUploadProps) {
           onChange={handleFileChange}
           className="file-input"
         />
-        
+
         <input
           ref={cameraInputRef}
           type="file"
