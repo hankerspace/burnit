@@ -454,7 +454,15 @@ export function CanvasStage() {
         useAppStore.getState().deselectLayers();
       }
     },
-    [currentProject, isPointInLayer, getResizeHandle, canvasState.selectedLayerIds, screenToCanvas, getEventCoordinates, addHapticFeedback]
+    [
+      currentProject,
+      isPointInLayer,
+      getResizeHandle,
+      canvasState.selectedLayerIds,
+      screenToCanvas,
+      getEventCoordinates,
+      addHapticFeedback,
+    ]
   );
 
   // Handle pointer move - drag or resize selected layer (works for both mouse and touch)
@@ -569,7 +577,7 @@ export function CanvasStage() {
   const handlePointerUp = useCallback(() => {
     // Restore page scrolling
     document.body.style.overflow = '';
-    
+
     dragStateRef.current = {
       isDragging: false,
       isResizing: false,

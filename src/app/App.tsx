@@ -17,7 +17,7 @@ function App() {
 
   // State for copied layers
   const [copiedLayers, setCopiedLayers] = React.useState<Layer[]>([]);
-  
+
   // Mobile state
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = React.useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = React.useState(false);
@@ -140,15 +140,17 @@ function App() {
         onToggleRightSidebar={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
         onShowAssetUpload={() => setShowMobileUpload(true)}
         onShowCameraCapture={() => setShowCameraCapture(true)}
-        onExport={() => {/* Export functionality will be handled by ExportDialog */}}
+        onExport={() => {
+          /* Export functionality will be handled by ExportDialog */
+        }}
         isLeftSidebarOpen={isLeftSidebarOpen}
         isRightSidebarOpen={isRightSidebarOpen}
       />
 
       {/* Mobile Overlay */}
       {(isLeftSidebarOpen || isRightSidebarOpen) && (
-        <div 
-          className="mobile-overlay active" 
+        <div
+          className="mobile-overlay active"
           onClick={() => {
             setIsLeftSidebarOpen(false);
             setIsRightSidebarOpen(false);
@@ -172,16 +174,10 @@ function App() {
       </div>
 
       {/* Mobile File Upload Dialog */}
-      <MobileFileUpload
-        isOpen={showMobileUpload}
-        onClose={() => setShowMobileUpload(false)}
-      />
+      <MobileFileUpload isOpen={showMobileUpload} onClose={() => setShowMobileUpload(false)} />
 
       {/* Camera Capture Dialog */}
-      <CameraCapture
-        isOpen={showCameraCapture}
-        onClose={() => setShowCameraCapture(false)}
-      />
+      <CameraCapture isOpen={showCameraCapture} onClose={() => setShowCameraCapture(false)} />
     </div>
   );
 }

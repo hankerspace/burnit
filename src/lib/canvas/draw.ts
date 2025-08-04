@@ -230,11 +230,11 @@ export function drawSelectionHandles(
   // Draw handles - larger size for mobile devices
   ctx.fillStyle = '#ff6b35';
   ctx.setLineDash([]);
-  
+
   // Detect mobile devices and use larger handles
   const isMobile = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
   const handleSize = (isMobile ? 12 : 8) / zoom;
-  
+
   const handlePositions = [
     [-halfWidth, -halfHeight], // Top-left
     [0, -halfHeight], // Top-center

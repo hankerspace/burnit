@@ -37,15 +37,11 @@ export function MobileNav({
             <span></span>
           </span>
         </button>
-        
-        <button
-          className="mobile-nav-btn"
-          onClick={onExport}
-          aria-label="Export"
-        >
+
+        <button className="mobile-nav-btn" onClick={onExport} aria-label="Export">
           📤
         </button>
-        
+
         <button
           className={`mobile-nav-btn ${isRightSidebarOpen ? 'active' : ''}`}
           onClick={onToggleRightSidebar}
@@ -64,7 +60,7 @@ export function MobileNav({
         >
           {showFAB ? '✕' : '+'}
         </button>
-        
+
         {showFAB && (
           <div className="fab-menu">
             <button
@@ -78,7 +74,7 @@ export function MobileNav({
               <span className="fab-icon">📷</span>
               <span className="fab-label">Take Photo</span>
             </button>
-            
+
             <button
               className="fab-action"
               onClick={() => {
@@ -90,7 +86,7 @@ export function MobileNav({
               <span className="fab-icon">🖼️</span>
               <span className="fab-label">Add Image</span>
             </button>
-            
+
             <button
               className="fab-action"
               onClick={() => {
@@ -102,7 +98,7 @@ export function MobileNav({
               <span className="fab-icon">📁</span>
               <span className="fab-label">Assets</span>
             </button>
-            
+
             <button
               className="fab-action"
               onClick={() => {

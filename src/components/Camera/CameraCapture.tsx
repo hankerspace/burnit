@@ -24,8 +24,8 @@ export function CameraCapture({ isOpen, onClose }: CameraCaptureProps) {
         video: {
           facingMode: 'environment', // Use back camera on mobile
           width: { ideal: 1920 },
-          height: { ideal: 1080 }
-        }
+          height: { ideal: 1080 },
+        },
       });
 
       streamRef.current = stream;
@@ -41,7 +41,7 @@ export function CameraCapture({ isOpen, onClose }: CameraCaptureProps) {
   // Stop camera stream
   const stopCamera = useCallback(() => {
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
     if (videoRef.current) {
@@ -73,19 +73,23 @@ export function CameraCapture({ isOpen, onClose }: CameraCaptureProps) {
 
       // Convert canvas to blob
       const blob = await new Promise<Blob>((resolve, reject) => {
-        canvas.toBlob((blob) => {
-          if (blob) {
-            resolve(blob);
-          } else {
-            reject(new Error('Failed to capture image'));
-          }
-        }, 'image/jpeg', 0.9);
+        canvas.toBlob(
+          (blob) => {
+            if (blob) {
+              resolve(blob);
+            } else {
+              reject(new Error('Failed to capture image'));
+            }
+          },
+          'image/jpeg',
+          0.9
+        );
       });
 
       // Create ImageAsset
       const img = new Image();
       const url = URL.createObjectURL(blob);
-      
+
       await new Promise((resolve, reject) => {
         img.onload = resolve;
         img.onerror = reject;
@@ -94,7 +98,7 @@ export function CameraCapture({ isOpen, onClose }: CameraCaptureProps) {
 
       const bitmap = await createImageBitmap(img);
       const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
-      
+
       const asset: ImageAsset = {
         id: generateId(),
         name: `Photo_${timestamp}`,
@@ -117,7 +121,7 @@ export function CameraCapture({ isOpen, onClose }: CameraCaptureProps) {
         if (currentProject) {
           const centerX = currentProject.settings.width / 2;
           const centerY = currentProject.settings.height / 2;
-          
+
           store.updateLayerTransform(layerId, {
             x: centerX,
             y: centerY,
@@ -160,11 +164,7 @@ export function CameraCapture({ isOpen, onClose }: CameraCaptureProps) {
       <div className="camera-capture-modal">
         <div className="camera-capture-header">
           <h3>Take Photo</h3>
-          <button 
-            className="close-button"
-            onClick={onClose}
-            aria-label="Close camera"
-          >
+          <button className="close-button" onClick={onClose} aria-label="Close camera">
             ✕
           </button>
         </div>
@@ -180,17 +180,8 @@ export function CameraCapture({ isOpen, onClose }: CameraCaptureProps) {
           ) : (
             <>
               <div className="camera-preview">
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted
-                  className="camera-video"
-                />
-                <canvas
-                  ref={canvasRef}
-                  style={{ display: 'none' }}
-                />
+                <video ref={videoRef} autoPlay playsInline muted className="camera-video" />
+                <canvas ref={canvasRef} style={{ display: 'none' }} />
               </div>
 
               <div className="camera-controls">
