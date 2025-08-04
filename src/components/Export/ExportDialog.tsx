@@ -10,8 +10,26 @@ import {
 } from '../../lib/export';
 import './ExportDialog.css';
 
-export function ExportDialog() {
-  const [isOpen, setIsOpen] = useState(false);
+interface ExportDialogProps {
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function ExportDialog({ isOpen: externalIsOpen, onOpenChange }: ExportDialogProps = {}) {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+
+  // Use external control if provided, otherwise use internal state
+  const isOpen = externalIsOpen !== undefined ? externalIsOpen : internalIsOpen;
+  const setIsOpen = useCallback(
+    (open: boolean) => {
+      if (onOpenChange) {
+        onOpenChange(open);
+      } else {
+        setInternalIsOpen(open);
+      }
+    },
+    [onOpenChange]
+  );
   const [exportFormat, setExportFormat] = useState<'png' | 'jpeg' | 'gif' | 'webm'>('gif');
   const [isExporting, setIsExporting] = useState(false);
 
@@ -72,97 +90,99 @@ export function ExportDialog() {
       setIsExporting(false);
       setIsOpen(false);
     }
-  }, [currentProject, exportFormat, timeline.currentTime, getActualDuration]);
-
-  if (!isOpen) {
-    return (
-      <button
-        className="btn btn-primary"
-        onClick={() => setIsOpen(true)}
-        disabled={!currentProject}
-      >
-        Export
-      </button>
-    );
-  }
+  }, [currentProject, exportFormat, timeline.currentTime, getActualDuration, setIsOpen]);
 
   return (
-    <div className="export-dialog-overlay" onClick={() => setIsOpen(false)}>
-      <div className="export-dialog" onClick={(e) => e.stopPropagation()}>
-        <div className="dialog-header">
-          <h3>Export Project</h3>
-          <button className="dialog-close btn btn-icon" onClick={() => setIsOpen(false)}>
-            ×
-          </button>
-        </div>
+    <>
+      {!isOpen && (
+        <button
+          className="btn btn-primary"
+          onClick={() => setIsOpen(true)}
+          disabled={!currentProject}
+        >
+          Export
+        </button>
+      )}
 
-        <div className="dialog-content">
-          <div className="export-options">
-            <div className="option-group">
-              <label className="option-label">Format</label>
-              <div className="format-buttons">
-                <button
-                  className={`format-btn ${exportFormat === 'png' ? 'active' : ''}`}
-                  onClick={() => setExportFormat('png')}
-                >
-                  PNG
-                </button>
-                <button
-                  className={`format-btn ${exportFormat === 'jpeg' ? 'active' : ''}`}
-                  onClick={() => setExportFormat('jpeg')}
-                >
-                  JPEG
-                </button>
-                <button
-                  className={`format-btn ${exportFormat === 'gif' ? 'active' : ''}`}
-                  onClick={() => setExportFormat('gif')}
-                >
-                  GIF
-                </button>
-                <button
-                  className={`format-btn ${exportFormat === 'webm' ? 'active' : ''}`}
-                  onClick={() => setExportFormat('webm')}
-                  title="WebM video export"
-                >
-                  WebM
-                </button>
+      {isOpen && (
+        <div className="export-dialog-overlay" onClick={() => setIsOpen(false)}>
+          <div className="export-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className="dialog-header">
+              <h3>Export Project</h3>
+              <button className="dialog-close btn btn-icon" onClick={() => setIsOpen(false)}>
+                ×
+              </button>
+            </div>
+
+            <div className="dialog-content">
+              <div className="export-options">
+                <div className="option-group">
+                  <label className="option-label">Format</label>
+                  <div className="format-buttons">
+                    <button
+                      className={`format-btn ${exportFormat === 'png' ? 'active' : ''}`}
+                      onClick={() => setExportFormat('png')}
+                    >
+                      PNG
+                    </button>
+                    <button
+                      className={`format-btn ${exportFormat === 'jpeg' ? 'active' : ''}`}
+                      onClick={() => setExportFormat('jpeg')}
+                    >
+                      JPEG
+                    </button>
+                    <button
+                      className={`format-btn ${exportFormat === 'gif' ? 'active' : ''}`}
+                      onClick={() => setExportFormat('gif')}
+                    >
+                      GIF
+                    </button>
+                    <button
+                      className={`format-btn ${exportFormat === 'webm' ? 'active' : ''}`}
+                      onClick={() => setExportFormat('webm')}
+                      title="WebM video export"
+                    >
+                      WebM
+                    </button>
+                  </div>
+                </div>
+
+                {currentProject && (
+                  <div className="export-preview">
+                    <div className="preview-info">
+                      <p>
+                        <strong>Size:</strong> {currentProject.settings.width} ×{' '}
+                        {currentProject.settings.height}
+                      </p>
+                      <p>
+                        <strong>FPS:</strong> {currentProject.settings.fps}
+                      </p>
+                      {(exportFormat === 'gif' || exportFormat === 'webm') && (
+                        <p>
+                          <strong>Duration:</strong> Animation will loop
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
-            {currentProject && (
-              <div className="export-preview">
-                <div className="preview-info">
-                  <p>
-                    <strong>Size:</strong> {currentProject.settings.width} ×{' '}
-                    {currentProject.settings.height}
-                  </p>
-                  <p>
-                    <strong>FPS:</strong> {currentProject.settings.fps}
-                  </p>
-                  {(exportFormat === 'gif' || exportFormat === 'webm') && (
-                    <p>
-                      <strong>Duration:</strong> Animation will loop
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
+            <div className="dialog-footer">
+              <button className="btn" onClick={() => setIsOpen(false)} disabled={isExporting}>
+                Cancel
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={handleExport}
+                disabled={isExporting || !currentProject}
+              >
+                {isExporting ? 'Exporting...' : `Export ${exportFormat.toUpperCase()}`}
+              </button>
+            </div>
           </div>
         </div>
-
-        <div className="dialog-footer">
-          <button className="btn" onClick={() => setIsOpen(false)} disabled={isExporting}>
-            Cancel
-          </button>
-          <button
-            className="btn btn-primary"
-            onClick={handleExport}
-            disabled={isExporting || !currentProject}
-          >
-            {isExporting ? 'Exporting...' : `Export ${exportFormat.toUpperCase()}`}
-          </button>
-        </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }
